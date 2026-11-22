@@ -106,6 +106,8 @@ fun PlayerSurface(
     // / analysis still running. The scrubber draws a flat track rather than
     // a fabricated wave when it is absent.
     envelope: FloatArray? = null,
+    // Living Worlds: the scene around the cover. Null: off, video or spoken word.
+    world: WorldFeed? = null,
     bottomInset: androidx.compose.ui.unit.Dp,
     // False while a card in the video feed holds the one video surface. This
     // composable is mounted whenever anything is playing, so without it the
@@ -336,7 +338,7 @@ fun PlayerSurface(
                 e = e, q = q, isVideo = state.isVideo, expanded = expanded,
                 backdropItem = libraryItem ?: artItem, artColors = artColors,
                 beat = beat, tilt = tilt, ambient = ambient, glow = glow, heightPx = heightPx,
-                artX = artX, artY = artY, artW = artW, artH = artH
+                artX = artX, artY = artY, artW = artW, artH = artH, world = world
             )
 
             PlayerArtwork(
@@ -587,7 +589,8 @@ private fun BoxScope.PlayerLight(
     artX: androidx.compose.ui.unit.Dp,
     artY: androidx.compose.ui.unit.Dp,
     artW: androidx.compose.ui.unit.Dp,
-    artH: androidx.compose.ui.unit.Dp
+    artH: androidx.compose.ui.unit.Dp,
+    world: WorldFeed?
 ) {
     val density = LocalDensity.current
     val ink = MediaColors.Ink
@@ -633,6 +636,18 @@ private fun BoxScope.PlayerLight(
                     endY = heightPx * 0.62f
                 )
             )
+        )
+    }
+
+    // Living Worlds: the scene around the cover (LivingWorld.kt). Above the
+    // backdrop and its scrim so it reads at full strength, below the rings,
+    // the edge light and the cover so the cover stays in front of it. It
+    // changes nothing drawn before or after it.
+    if (world != null && !isVideo && e > 0.4f) {
+        WorldInPlayer(
+            world = world, item = backdropItem, light = light, colors = artColors,
+            tilt = if (q.parallax) tilt else null, active = expanded && e > 0.9f, e = e, q = q,
+            artX = artX, artY = artY, artW = artW, artH = artH
         )
     }
 
@@ -713,6 +728,36 @@ private fun BoxScope.PlayerLight(
             }
         }
     }
+}
+
+/** The world layer, placed from the cover's geometry. Its own function to keep PlayerLight small. */
+@Composable
+private fun BoxScope.WorldInPlayer(
+    world: WorldFeed,
+    item: AppMediaItem?,
+    light: CoverLight?,
+    colors: ArtColors?,
+    tilt: Tilt?,
+    active: Boolean,
+    e: Float,
+    q: QualityProfile,
+    artX: androidx.compose.ui.unit.Dp,
+    artY: androidx.compose.ui.unit.Dp,
+    artW: androidx.compose.ui.unit.Dp,
+    artH: androidx.compose.ui.unit.Dp
+) {
+    val density = LocalDensity.current
+    val cx = with(density) { (artX + artW / 2f).toPx() }
+    val cy = with(density) { (artY + artH / 2f).toPx() }
+    val side = with(density) { minOf(artW, artH).toPx() }
+    val textTop = with(density) { (artY + artH + 20.dp).toPx() }
+    LivingWorldLayer(
+        feed = world, item = item, light = light, colors = colors, tilt = tilt, active = active,
+        coverCx = cx, coverCy = cy, coverSize = side, textTop = textTop,
+        level = q.level, relieved = q.lightField == 0,
+        modifier = Modifier.matchParentSize().clearAndSetSemantics { }
+            .graphicsLayer { alpha = ((e - 0.4f) / 0.6f).coerceIn(0f, 1f) }
+    )
 }
 
 /** The one artwork element that morphs from the pill's thumbnail to the hero cover. */

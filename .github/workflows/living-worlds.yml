@@ -1,0 +1,85 @@
+# Living Worlds: what it looks like, on every push.
+#
+#   previews  The JVM tests (app/src/test): selection, bounds, pause and
+#             the visibility check, then every world drawn by its own code
+#             into PNGs and GIFs (app/build/living-worlds). Fast.
+#   phone     The real app on an Android emulator: the debug build, seven
+#             test songs (tools/make_world_tracks.py) opened with "Open with
+#             Via", Now Playing captured as stills and short recordings
+#             (tools/world_screenshots.sh).
+#
+# Both upload what they made as artifacts on the run page.
+name: Living Worlds
+
+on:
+  push:
+    branches: ["claude/**", "feature/**"]
+  workflow_dispatch:
+
+jobs:
+  previews:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Unit tests and previews
+        run: ./gradlew --no-daemon --stacktrace :app:testDebugUnitTest
+      - name: Keep the previews
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: living-worlds-previews
+          path: app/build/living-worlds
+          if-no-files-found: warn
+      - name: Keep the test report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-report
+          path: app/build/reports/tests
+
+  phone:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Debug build with an x86_64 split for the emulator
+        run: ./gradlew --no-daemon --stacktrace :app:assembleDebug -Pvia.extraAbi=x86_64
+      - name: Test songs
+        run: |
+          sudo apt-get install -y --no-install-recommends ffmpeg >/dev/null 2>&1 || true
+          python3 tools/make_world_tracks.py tracks
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Screenshots on an emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        env:
+          QEMU_AUDIO_DRV: none
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: false
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -no-boot-anim -camera-back none
+          script: bash tools/world_screenshots.sh "$(ls app/build/outputs/apk/debug/*x86_64*.apk | head -1)" tracks
+      - name: Keep the screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: living-worlds-phone
+          path: screens
+          if-no-files-found: warn

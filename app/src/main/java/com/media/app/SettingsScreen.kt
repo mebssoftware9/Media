@@ -112,6 +112,7 @@ fun SettingsScreen(
             checked = reactiveArt,
             onChange = { on -> settingsScope.launch { SettingsStore.setReactiveArt(context, on) } }
         )
+        WorldRow()
 
         SectionLabel(stringResource(R.string.settings_sound))
         val sound by SoundEngine.settings.collectAsState()
@@ -612,6 +613,60 @@ private fun LanguageChoice(name: String, detail: String?, selected: Boolean, onC
         }
     }
 }
+
+/** Living Worlds: Auto, Off, or one world for every song (LivingWorld.kt). */
+@Composable
+private fun WorldRow() {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val mode by remember(context) { SettingsStore.worldFlow(context) }.collectAsState(initial = WorldMode.AUTO)
+    var open by remember { mutableStateOf(false) }
+    SettingRow(
+        Icons.Outlined.Landscape, stringResource(R.string.settings_world), worldName(mode),
+        subtitle = stringResource(R.string.settings_world_sub)
+    ) { open = true }
+    if (open) {
+        AlertDialog(
+            onDismissRequest = { open = false },
+            containerColor = MediaColors.Modal,
+            title = { Text(stringResource(R.string.settings_world), color = MediaColors.Cream) },
+            text = {
+                Column(Modifier.verticalScroll(rememberScrollState())) {
+                    WorldMode.entries.forEach { option ->
+                        LanguageChoice(
+                            worldName(option),
+                            if (option == WorldMode.AUTO) stringResource(R.string.world_auto_detail) else null,
+                            selected = option == mode
+                        ) {
+                            open = false
+                            scope.launch { SettingsStore.setWorld(context, option) }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton({ open = false }) {
+                    Text(stringResource(R.string.action_cancel), color = MediaColors.CreamDim)
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun worldName(mode: WorldMode): String = stringResource(
+    when (mode) {
+        WorldMode.AUTO -> R.string.world_auto
+        WorldMode.OFF -> R.string.world_off
+        WorldMode.NIGHT_RAIN -> R.string.world_night_rain
+        WorldMode.FIREFLIES -> R.string.world_fireflies
+        WorldMode.OCEAN -> R.string.world_ocean
+        WorldMode.COSMOS -> R.string.world_cosmos
+        WorldMode.DREAM -> R.string.world_dream
+        WorldMode.EMBERS -> R.string.world_embers
+        WorldMode.MINIMAL -> R.string.world_minimal
+    }
+)
 
 @Composable
 private fun SectionLabel(text: String) {
