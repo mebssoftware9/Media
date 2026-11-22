@@ -865,6 +865,18 @@ fun HomeScaffold(vm: PlayerViewModel) {
         // only if the service's player is not there yet.
         clock = { PlayerClock.positionMs() ?: vm.boundPlayer()?.currentPosition ?: state.positionMs }
     )
+    // ---- Living Worlds (LivingWorld.kt): the scene around the cover ----
+    // Music only, like the pulse. It reads the same analysis at the same
+    // clock, but runs its own frame loop only while Now Playing is open.
+    val worldMode by remember(context) { SettingsStore.worldFlow(context) }.collectAsState(initial = WorldMode.OFF)
+    val world = if (analysable && worldMode != WorldMode.OFF) WorldFeed(
+        mode = worldMode,
+        shape = shape,
+        volume = musicVolume,
+        playing = state.isPlaying,
+        speed = state.speed,
+        clock = { PlayerClock.positionMs() ?: vm.boundPlayer()?.currentPosition ?: state.positionMs }
+    ) else null
 
     // Hoisted to scaffold scope: these were being called INSIDE tap handlers,
     // so every "View album" / "View artist" regrouped the entire library on
@@ -1004,7 +1016,8 @@ fun HomeScaffold(vm: PlayerViewModel) {
                 nav = nav, lib = lib, state = state, vm = vm, db = db, scope = scope,
                 playingItem = playingItem, libraryPlaying = libraryPlaying, beat = beat,
                 envelope = envelope, feedOwnsVideo = feedOwnsVideo, feedVideoLive = feedVideoLive,
-                onlineLookups = onlineLookups, reactiveArtOn = reactiveArtOn, sharing = shareState.sharing
+                onlineLookups = onlineLookups, reactiveArtOn = reactiveArtOn, sharing = shareState.sharing,
+                world = world
             )
             HomeSheets(
                 nav = nav, lib = lib, state = state, vm = vm, db = db, scope = scope,
@@ -1554,7 +1567,8 @@ private fun HomePlayer(
     feedVideoLive: Boolean,
     onlineLookups: Boolean,
     reactiveArtOn: Boolean,
-    sharing: Boolean
+    sharing: Boolean,
+    world: WorldFeed?
 ) {
     val context = LocalContext.current
     // §11/§15: ONE surface. Sits above the bottom bar so the expanded state
@@ -1600,6 +1614,7 @@ private fun HomePlayer(
             },
             beat = beat,
             envelope = envelope,
+            world = world,
             videoSurface = !feedOwnsVideo,
             bottomInset = navBottom + BottomBarHeight + MiniPlayerGap,
             onExpandedChange = { nav.showPlayer = it },

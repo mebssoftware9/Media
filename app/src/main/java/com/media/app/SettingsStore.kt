@@ -31,6 +31,7 @@ object SettingsStore {
     private val PLAYER_HINT = booleanPreferencesKey("player_hint_seen")
     private val REACTIVE_ART = booleanPreferencesKey("reactive_artwork")
     private val QUALITY = stringPreferencesKey("display_quality")
+    private val WORLD = stringPreferencesKey("living_world")
     private val AVATAR = longPreferencesKey("avatar_stamp")
     private val ONLINE = booleanPreferencesKey("online_enrichment")
     private val ONLINE_ASKED = booleanPreferencesKey("online_enrichment_asked")
@@ -112,6 +113,16 @@ object SettingsStore {
 
     suspend fun setReactiveArt(context: Context, value: Boolean) {
         context.dataStore.edit { it[REACTIVE_ART] = value }
+    }
+
+    // Living Worlds (LivingWorld.kt). ON (Auto) by default, unlike Reactive
+    // artwork: it is the scene around the cover, not the cover itself, so
+    // the cover stays still unless that is turned on too.
+    fun worldFlow(context: Context): Flow<WorldMode> =
+        context.dataStore.data.map { WorldMode.fromName(it[WORLD]) }
+
+    suspend fun setWorld(context: Context, mode: WorldMode) {
+        context.dataStore.edit { it[WORLD] = mode.name }
     }
 
     // Artwork and lyrics lookups. OFF until the listener says yes: the app's

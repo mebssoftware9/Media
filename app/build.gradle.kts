@@ -48,6 +48,9 @@ android {
             isEnable = true
             reset()
             include("arm64-v8a", "armeabi-v7a")
+            // The Living Worlds screenshot workflow runs an x86_64 emulator:
+            // -Pvia.extraAbi=x86_64 adds that one split. Never set for Play.
+            (project.findProperty("via.extraAbi") as String?)?.let { include(it) }
             isUniversalApk = false
         }
     }
@@ -65,6 +68,10 @@ android {
     }
     kotlinOptions {
         jvmTarget = "17"
+    }
+    // The Living Worlds previews draw with AWT; CI has no display.
+    testOptions {
+        unitTests.all { it.systemProperty("java.awt.headless", "true") }
     }
     buildFeatures {
         compose = true
@@ -124,4 +131,7 @@ dependencies {
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
+
+    // JVM tests: Living Worlds' selection, bounds and rendered previews.
+    testImplementation("junit:junit:4.13.2")
 }
