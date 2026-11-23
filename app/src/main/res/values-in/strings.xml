@@ -240,6 +240,14 @@
     <string name="action_next">Berikutnya</string>
     <string name="video_forward_10">Maju 10 detik</string>
     <string name="skip_forward_30">Maju 30 detik</string>
+    <string name="chapter_of">Bab %1$d dari %2$d</string>
+    <string name="chapter_left">sisa %1$s</string>
+    <string name="marks_title">Bab dan penanda</string>
+    <string name="marks_chapters">Bab</string>
+    <string name="marks_bookmarks">Penanda</string>
+    <string name="marks_add">Tambahkan penanda di %1$s</string>
+    <string name="marks_none">Belum ada penanda. Tambahkan satu untuk kembali ke momen ini.</string>
+    <string name="marks_remove">Hapus penanda</string>
     <string name="cd_app_mark">Via</string>
     <string name="share_playing_elsewhere">Diputar di perangkat lain</string>
     <string name="share_name">Via Share</string>

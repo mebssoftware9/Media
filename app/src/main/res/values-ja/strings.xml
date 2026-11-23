@@ -240,6 +240,14 @@
     <string name="action_next">次へ</string>
     <string name="video_forward_10">10秒進む</string>
     <string name="skip_forward_30">30秒進む</string>
+    <string name="chapter_of">第%1$d章 / 全%2$d章</string>
+    <string name="chapter_left">残り %1$s</string>
+    <string name="marks_title">チャプターとブックマーク</string>
+    <string name="marks_chapters">チャプター</string>
+    <string name="marks_bookmarks">ブックマーク</string>
+    <string name="marks_add">%1$s にブックマークを追加</string>
+    <string name="marks_none">ブックマークはまだありません。この場面に戻れるよう追加しましょう。</string>
+    <string name="marks_remove">ブックマークを削除</string>
     <string name="cd_app_mark">Via</string>
     <string name="share_playing_elsewhere">別のデバイスで再生中</string>
     <string name="share_name">Via Share</string>

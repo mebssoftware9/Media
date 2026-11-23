@@ -264,6 +264,14 @@
     <string name="action_next">Следующий</string>
     <string name="video_forward_10">Вперёд на 10 секунд</string>
     <string name="skip_forward_30">Вперёд на 30 секунд</string>
+    <string name="chapter_of">Глава %1$d из %2$d</string>
+    <string name="chapter_left">осталось %1$s</string>
+    <string name="marks_title">Главы и закладки</string>
+    <string name="marks_chapters">Главы</string>
+    <string name="marks_bookmarks">Закладки</string>
+    <string name="marks_add">Добавить закладку на %1$s</string>
+    <string name="marks_none">Закладок пока нет. Добавьте, чтобы вернуться к этому моменту.</string>
+    <string name="marks_remove">Удалить закладку</string>
     <string name="cd_app_mark">Via</string>
     <string name="share_playing_elsewhere">Играет на другом устройстве</string>
     <string name="share_name">Via Share</string>

@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.Replay10
 import androidx.compose.material.icons.filled.Forward30
+import androidx.compose.material.icons.outlined.Bookmarks
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -138,6 +139,9 @@ fun PlayerSurface(
     }
     var showSleepSheet by remember { mutableStateOf(false) }
     var showSpeedSheet by remember { mutableStateOf(false) }
+    // Podcasts and audiobooks: the file's own chapters, and the listener's bookmarks.
+    var showMarks by remember { mutableStateOf(false) }
+    val chapters = rememberChapters(state.currentUri, state.longForm && !state.isVideo)
     // Lyrics take the artwork's place rather than opening a new screen: the
     // words belong with the music, and the transport stays under the thumb.
     var showLyrics by remember { mutableStateOf(false) }
@@ -397,7 +401,9 @@ fun PlayerSurface(
                     onOpenAudioPath = onOpenAudioPath,
                     envelope = envelope, beat = beat, npAccent = npAccent,
                     onOpenSleep = { showSleepSheet = true },
-                    onOpenSpeed = { showSpeedSheet = true }
+                    onOpenSpeed = { showSpeedSheet = true },
+                    chapters = chapters,
+                    onOpenMarks = { showMarks = true }
                 )
             }
         }
@@ -427,6 +433,13 @@ fun PlayerSurface(
     }
     if (showSpeedSheet) {
         SpeedSheet(state = state, vm = vm, onDismiss = { showSpeedSheet = false })
+    }
+    if (showMarks) {
+        ChaptersAndBookmarksSheet(
+            state = state, chapters = chapters,
+            onSeek = { vm.seekTo(it) },
+            onDismiss = { showMarks = false }
+        )
     }
 }
 
@@ -1082,7 +1095,9 @@ private fun BoxScope.NowPlayingControls(
     beat: BeatState,
     npAccent: Color,
     onOpenSleep: () -> Unit,
-    onOpenSpeed: () -> Unit
+    onOpenSpeed: () -> Unit,
+    chapters: List<Chapter>,
+    onOpenMarks: () -> Unit
 ) {
     Column(
         // Measured BEFORE the nav-bar padding. Measured after it,
@@ -1149,10 +1164,16 @@ private fun BoxScope.NowPlayingControls(
                     Text(fmtClock(state.durationMs), style = Typo.Tertiary,
                         color = MediaColors.CreamFaint)
                 }
+                // The chapter being heard and the time left in it, beside the
+                // whole item's progress above. Only when the file has chapters.
+                if (chapters.isNotEmpty()) {
+                    ChapterLine(chapters, state.positionMs, state.durationMs, onClick = onOpenMarks)
+                }
             }
         }
 
-        NowPlayingTransport(state = state, vm = vm, onOpenSleep = onOpenSleep, onOpenSpeed = onOpenSpeed)
+        NowPlayingTransport(state = state, vm = vm, onOpenSleep = onOpenSleep, onOpenSpeed = onOpenSpeed,
+            onOpenMarks = onOpenMarks)
     }
 }
 
@@ -1211,7 +1232,8 @@ private fun NowPlayingTransport(
     state: PlayerState,
     vm: PlayerViewModel,
     onOpenSleep: () -> Unit,
-    onOpenSpeed: () -> Unit
+    onOpenSpeed: () -> Unit,
+    onOpenMarks: () -> Unit
 ) {
     Row(
         Modifier.fillMaxWidth().padding(Space.xl, Space.md),
@@ -1257,6 +1279,11 @@ private fun NowPlayingTransport(
             modifier = Modifier.size(IconSize.lg).pressScale(haptic = true) { vm.cycleRepeat() }
         )
         LoopButton(vm)
+        if (state.longForm && !state.isVideo) {
+            Icon(Icons.Outlined.Bookmarks, stringResource(R.string.marks_title),
+                tint = MediaColors.CreamDim,
+                modifier = Modifier.size(IconSize.lg).pressScale(haptic = true, onClick = onOpenMarks))
+        }
         Text(
             speedLabel(state.speed), style = Typo.Primary,
             color = if (state.speed != 1.0f) MediaColors.Accent else MediaColors.CreamDim,

@@ -240,6 +240,14 @@
     <string name="action_next">Tiếp</string>
     <string name="video_forward_10">Tới 10 giây</string>
     <string name="skip_forward_30">Tới 30 giây</string>
+    <string name="chapter_of">Chương %1$d / %2$d</string>
+    <string name="chapter_left">còn %1$s</string>
+    <string name="marks_title">Chương và dấu trang</string>
+    <string name="marks_chapters">Chương</string>
+    <string name="marks_bookmarks">Dấu trang</string>
+    <string name="marks_add">Thêm dấu trang tại %1$s</string>
+    <string name="marks_none">Chưa có dấu trang. Thêm một dấu để quay lại khoảnh khắc này.</string>
+    <string name="marks_remove">Xoá dấu trang</string>
     <string name="cd_app_mark">Via</string>
     <string name="share_playing_elsewhere">Đang phát trên thiết bị khác</string>
     <string name="share_name">Via Share</string>

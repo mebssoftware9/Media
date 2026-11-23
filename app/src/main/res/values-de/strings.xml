@@ -248,6 +248,14 @@
     <string name="action_next">Weiter</string>
     <string name="video_forward_10">10 Sekunden vor</string>
     <string name="skip_forward_30">30 Sekunden vor</string>
+    <string name="chapter_of">Kapitel %1$d von %2$d</string>
+    <string name="chapter_left">noch %1$s</string>
+    <string name="marks_title">Kapitel und Lesezeichen</string>
+    <string name="marks_chapters">Kapitel</string>
+    <string name="marks_bookmarks">Lesezeichen</string>
+    <string name="marks_add">Lesezeichen bei %1$s setzen</string>
+    <string name="marks_none">Noch keine Lesezeichen. Setze eins, um zu dieser Stelle zurückzukehren.</string>
+    <string name="marks_remove">Lesezeichen entfernen</string>
     <string name="cd_app_mark">Via</string>
     <string name="share_playing_elsewhere">Läuft auf einem anderen Gerät</string>
     <string name="share_name">Via Share</string>

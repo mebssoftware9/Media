@@ -248,6 +248,14 @@
     <string name="action_next">Sonraki</string>
     <string name="video_forward_10">10 saniye ileri</string>
     <string name="skip_forward_30">30 saniye ileri</string>
+    <string name="chapter_of">Bölüm %1$d / %2$d</string>
+    <string name="chapter_left">%1$s kaldı</string>
+    <string name="marks_title">Bölümler ve yer işaretleri</string>
+    <string name="marks_chapters">Bölümler</string>
+    <string name="marks_bookmarks">Yer işaretleri</string>
+    <string name="marks_add">%1$s konumuna yer işareti ekle</string>
+    <string name="marks_none">Henüz yer işareti yok. Bu ana dönmek için bir tane ekleyin.</string>
+    <string name="marks_remove">Yer işaretini kaldır</string>
     <string name="cd_app_mark">Via</string>
     <string name="share_playing_elsewhere">Başka bir cihazda çalıyor</string>
     <string name="share_name">Via Share</string>

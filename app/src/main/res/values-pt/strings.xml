@@ -248,6 +248,14 @@
     <string name="action_next">Próxima</string>
     <string name="video_forward_10">Avançar 10 segundos</string>
     <string name="skip_forward_30">Avançar 30 segundos</string>
+    <string name="chapter_of">Capítulo %1$d de %2$d</string>
+    <string name="chapter_left">faltam %1$s</string>
+    <string name="marks_title">Capítulos e marcadores</string>
+    <string name="marks_chapters">Capítulos</string>
+    <string name="marks_bookmarks">Marcadores</string>
+    <string name="marks_add">Adicionar um marcador em %1$s</string>
+    <string name="marks_none">Ainda não há marcadores. Adicione um para voltar a este momento.</string>
+    <string name="marks_remove">Remover marcador</string>
     <string name="cd_app_mark">Via</string>
     <string name="share_playing_elsewhere">Tocando em outro dispositivo</string>
     <string name="share_name">Via Share</string>
