@@ -11,9 +11,9 @@
 # Both upload what they made as artifacts on the run page.
 name: Living Worlds
 
+# By hand only (Actions > Living Worlds > Run workflow): the emulator job
+# takes 20-30 minutes, too long to run on every push.
 on:
-  push:
-    branches: ["claude/**", "feature/**"]
   workflow_dispatch:
 
 jobs:
