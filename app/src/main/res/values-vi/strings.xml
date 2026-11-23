@@ -407,6 +407,8 @@
     <string name="queue_reorder">Sắp xếp lại</string>
     <string name="scrubber_spoken">Tua. %1$s trên %2$s</string>
     <string name="search_hint">Tìm trong thư viện của bạn</string>
+    <string name="search_recent">Tìm kiếm gần đây</string>
+    <string name="search_recent_remove">Xoá khỏi tìm kiếm gần đây</string>
     <string name="search_empty_hint">Tìm bất cứ thứ gì trong thư viện của bạn</string>
     <string name="search_no_matches_title">Không có kết quả trong thư viện</string>
     <string name="search_no_matches_body">Không có gì ở đây khớp với “%1$s”.</string>

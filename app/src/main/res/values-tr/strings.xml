@@ -422,6 +422,8 @@
     <string name="queue_reorder">Yeniden sırala</string>
     <string name="scrubber_spoken">Konum. %1$s / %2$s</string>
     <string name="search_hint">Kitaplığında ara</string>
+    <string name="search_recent">Son aramalar</string>
+    <string name="search_recent_remove">Son aramalardan kaldır</string>
     <string name="search_empty_hint">Kitaplığında her şeyi bul</string>
     <string name="search_no_matches_title">Kitaplığında eşleşme yok</string>
     <string name="search_no_matches_body">Burada “%1$s” ile eşleşen bir şey yok.</string>

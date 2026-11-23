@@ -12,6 +12,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.History
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -51,6 +54,11 @@ fun SearchScreen(
 ) {
     var query by remember { mutableStateOf("") }
     val focus = remember { FocusRequester() }
+    val context = LocalContext.current
+    LaunchedEffect(Unit) { RecentSearches.load(context) }
+    val recents by RecentSearches.list.collectAsState()
+    // A search counts as made when a result is opened or Search is pressed.
+    fun keepQuery() { RecentSearches.add(context, query) }
     val keyboard = LocalSoftwareKeyboardController.current
 
     // §19: focus immediately, don't make people tap the field they just opened.
@@ -61,23 +69,23 @@ fun SearchScreen(
 
     // Built once per library, not per keystroke.
     val index = remember(all) {
-        all.map { it to "${it.title} ${it.artist} ${it.album}".lowercase() }
+        all.map { it to searchFold("${it.title} ${it.artist} ${it.album}") }
     }
     val albums = remember(all) { MediaRepository.albumsOf(all) }
     val artists = remember(all) { MediaRepository.artistsOf(all) }
 
-    val q = query.trim().lowercase()
+    val q = searchFold(query.trim())
     val trackHits = remember(q, index) {
         if (q.isBlank()) emptyList() else index.filter { it.second.contains(q) }.map { it.first }
     }
     val albumHits = remember(q, albums) {
         if (q.isBlank()) emptyList()
-        else albums.filter { it.name.lowercase().contains(q) || it.artist.lowercase().contains(q) }
+        else albums.filter { searchFold(it.name).contains(q) || searchFold(it.artist).contains(q) }
             .take(8)
     }
     val artistHits = remember(q, artists) {
         if (q.isBlank()) emptyList()
-        else artists.filter { it.name.lowercase().contains(q) }.take(8)
+        else artists.filter { searchFold(it.name).contains(q) }.take(8)
     }
     val nothing = q.isNotBlank() && trackHits.isEmpty() && albumHits.isEmpty() && artistHits.isEmpty()
 
@@ -108,6 +116,7 @@ fun SearchScreen(
                         textStyle = Typo.Body.copy(color = MediaColors.Cream),
                         cursorBrush = SolidColor(MediaColors.Accent),
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        keyboardActions = KeyboardActions(onSearch = { keepQuery(); keyboard?.hide() }),
                         modifier = Modifier.fillMaxWidth().focusRequester(focus)
                     )
                 }
@@ -119,6 +128,12 @@ fun SearchScreen(
         }
 
         when {
+            q.isBlank() && recents.isNotEmpty() -> RecentList(
+                recents = recents,
+                onPick = { query = it },
+                onRemove = { RecentSearches.remove(context, it) },
+                onClear = { RecentSearches.clear(context) }
+            )
             q.isBlank() -> CenterHint(stringResource(R.string.search_empty_hint))
 
             // §19's exact prescription: name the situation, then offer a way out.
@@ -163,7 +178,7 @@ fun SearchScreen(
                             subtitle = plural(R.plurals.count_songs, a.trackCount),
                             art = a.tracks.firstOrNull(),
                             circular = true
-                        ) { onOpenArtist(a) }
+                        ) { keepQuery(); onOpenArtist(a) }
                     }
                 }
                 if (albumHits.isNotEmpty()) {
@@ -175,7 +190,7 @@ fun SearchScreen(
                             subtitle = shownArtist(al.artist),
                             art = al.tracks.firstOrNull(),
                             circular = false
-                        ) { onOpenAlbum(al) }
+                        ) { keepQuery(); onOpenAlbum(al) }
                     }
                 }
                 if (trackHits.isNotEmpty()) {
@@ -187,7 +202,7 @@ fun SearchScreen(
                             subtitle = shownArtist(t.artist),
                             art = t,
                             circular = false
-                        ) { onPlay(trackHits, i) }
+                        ) { keepQuery(); onPlay(trackHits, i) }
                     }
                 }
             }
@@ -228,3 +243,80 @@ private fun CenterHint(text: String) {
         Text(text, style = Typo.Body, color = MediaColors.CreamFaint)
     }
 }
+
+/** What was searched for before, newest first: tap to search it again. */
+@Composable
+private fun RecentList(
+    recents: List<String>,
+    onPick: (String) -> Unit,
+    onRemove: (String) -> Unit,
+    onClear: () -> Unit
+) {
+    LazyColumn(contentPadding = PaddingValues(bottom = bottomSafePadding(gap = 100.dp))) {
+        item {
+            Row(
+                Modifier.fillMaxWidth().padding(Space.xl, Space.lg, Space.md, Space.xs),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(stringResource(R.string.search_recent).uppercase(), style = Typo.Micro,
+                    color = MediaColors.CreamDim, modifier = Modifier.weight(1f))
+                Text(stringResource(R.string.action_clear), style = Typo.Label, color = MediaColors.Accent,
+                    modifier = Modifier.clip(RoundedCornerShape(Radius.pill)).clickable(onClick = onClear)
+                        .padding(Space.md, Space.sm))
+            }
+        }
+        items(recents.size, key = { recents[it] }) { i ->
+            val r = recents[i]
+            Row(
+                Modifier.fillMaxWidth().clickable { onPick(r) }.padding(start = Space.xl, end = Space.sm),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Outlined.History, null, tint = MediaColors.CreamFaint, modifier = Modifier.size(IconSize.md))
+                Spacer(Modifier.width(Space.md))
+                Text(r, style = Typo.Primary, color = MediaColors.Cream, maxLines = 1,
+                    overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).padding(vertical = 14.dp))
+                Icon(Icons.Filled.Close, stringResource(R.string.search_recent_remove), tint = MediaColors.CreamFaint,
+                    modifier = Modifier.size(44.dp).clip(CircleShape).clickable { onRemove(r) }.padding(12.dp))
+            }
+        }
+    }
+}
+
+/** The last eight searches, in the app's private preferences. */
+object RecentSearches {
+    private const val PREFS = "recent_searches"
+    private const val KEY = "list"
+    private const val MAX = 8
+    private val _list = kotlinx.coroutines.flow.MutableStateFlow<List<String>>(emptyList())
+    val list: kotlinx.coroutines.flow.StateFlow<List<String>> = _list
+    private var loaded = false
+
+    private fun prefs(c: android.content.Context) =
+        c.applicationContext.getSharedPreferences(PREFS, android.content.Context.MODE_PRIVATE)
+
+    fun load(c: android.content.Context) {
+        if (loaded) return
+        _list.value = prefs(c).getString(KEY, null).orEmpty().split('\n').filter { it.isNotBlank() }.take(MAX)
+        loaded = true
+    }
+
+    private fun save(c: android.content.Context, l: List<String>) {
+        _list.value = l
+        prefs(c).edit().putString(KEY, l.joinToString("\n")).apply()
+    }
+
+    fun add(c: android.content.Context, query: String) {
+        load(c)
+        val q = query.trim().replace('\n', ' ')
+        if (q.isEmpty()) return
+        save(c, (listOf(q) + _list.value.filterNot { it.equals(q, ignoreCase = true) }).take(MAX))
+    }
+
+    fun remove(c: android.content.Context, query: String) { load(c); save(c, _list.value - query) }
+    fun clear(c: android.content.Context) { load(c); save(c, emptyList()) }
+}
+
+/** Lower case without accents: "Beyoncé" and "beyonce" match each other. */
+internal fun searchFold(s: String): String =
+    java.text.Normalizer.normalize(s.lowercase(), java.text.Normalizer.Form.NFD)
+        .replace(Regex("\\p{Mn}+"), "")

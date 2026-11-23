@@ -422,6 +422,8 @@
     <string name="queue_reorder">Reordenar</string>
     <string name="scrubber_spoken">Buscar. %1$s de %2$s</string>
     <string name="search_hint">Busca en tu biblioteca</string>
+    <string name="search_recent">Búsquedas recientes</string>
+    <string name="search_recent_remove">Quitar de búsquedas recientes</string>
     <string name="search_empty_hint">Encuentra lo que quieras en tu biblioteca</string>
     <string name="search_no_matches_title">Sin resultados en tu biblioteca</string>
     <string name="search_no_matches_body">Nada coincide con «%1$s».</string>

@@ -422,6 +422,8 @@
     <string name="queue_reorder">Neu anordnen</string>
     <string name="scrubber_spoken">Spulen. %1$s von %2$s</string>
     <string name="search_hint">In deiner Mediathek suchen</string>
+    <string name="search_recent">Letzte Suchen</string>
+    <string name="search_recent_remove">Aus letzten Suchen entfernen</string>
     <string name="search_empty_hint">Finde alles in deiner Mediathek</string>
     <string name="search_no_matches_title">Keine Treffer in deiner Mediathek</string>
     <string name="search_no_matches_body">Nichts passt zu „%1$s“.</string>

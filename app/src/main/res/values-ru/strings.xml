@@ -452,6 +452,8 @@
     <string name="queue_reorder">Переставить</string>
     <string name="scrubber_spoken">Перемотка. %1$s из %2$s</string>
     <string name="search_hint">Поиск по медиатеке</string>
+    <string name="search_recent">Недавние запросы</string>
+    <string name="search_recent_remove">Удалить из недавних запросов</string>
     <string name="search_empty_hint">Найдите что угодно в своей медиатеке</string>
     <string name="search_no_matches_title">В медиатеке ничего не найдено</string>
     <string name="search_no_matches_body">Ничего не подходит под «%1$s».</string>

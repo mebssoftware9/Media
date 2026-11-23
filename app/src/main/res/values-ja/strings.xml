@@ -407,6 +407,8 @@
     <string name="queue_reorder">並べ替え</string>
     <string name="scrubber_spoken">シーク。%2$s中%1$s</string>
     <string name="search_hint">ライブラリを検索</string>
+    <string name="search_recent">最近の検索</string>
+    <string name="search_recent_remove">最近の検索から削除</string>
     <string name="search_empty_hint">ライブラリから何でも探せます</string>
     <string name="search_no_matches_title">ライブラリに一致するものはありません</string>
     <string name="search_no_matches_body">「%1$s」に一致するものはありません。</string>

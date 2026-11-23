@@ -407,6 +407,8 @@
     <string name="queue_reorder">Ubah urutan</string>
     <string name="scrubber_spoken">Geser. %1$s dari %2$s</string>
     <string name="search_hint">Cari di koleksimu</string>
+    <string name="search_recent">Pencarian terbaru</string>
+    <string name="search_recent_remove">Hapus dari pencarian terbaru</string>
     <string name="search_empty_hint">Temukan apa saja di koleksimu</string>
     <string name="search_no_matches_title">Tidak ada yang cocok di koleksimu</string>
     <string name="search_no_matches_body">Tidak ada yang cocok dengan “%1$s”.</string>
