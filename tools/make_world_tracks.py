@@ -3,7 +3,7 @@
 
     python3 tools/make_world_tracks.py OUT_DIR
 
-Each is 40 seconds at 120 BPM - a kick on every beat, a snare on 2 and 4,
+Each is 150 seconds at 120 BPM (long enough that none ends before its shots) - a kick on every beat, a snare on 2 and 4,
 hi-hats on the eighths, a low pad - so Via's analysis finds a real groove
 to move the world with. Each carries an embedded cover in the colours that
 make Living Worlds choose that world (the same covers the unit tests draw,
@@ -61,14 +61,14 @@ def cover_png(a, b, path, n=512):
 
 GROOVE = (
     # Kick: a pitch drop on every beat.
-    "aevalsrc='0.9*sin(2*PI*t*(48+90*exp(-mod(t,0.5)*28)))*exp(-mod(t,0.5)*9)':s=44100:d=40[k];"
+    "aevalsrc='0.9*sin(2*PI*t*(48+90*exp(-mod(t,0.5)*28)))*exp(-mod(t,0.5)*9)':s=44100:d=150[k];"
     # Snare: noise on 2 and 4.
-    "aevalsrc='0.45*(2*random(0)-1)*exp(-mod(t-0.5,1)*22)*gte(mod(t-0.5,1),0)':s=44100:d=40,"
+    "aevalsrc='0.45*(2*random(0)-1)*exp(-mod(t-0.5,1)*22)*gte(mod(t-0.5,1),0)':s=44100:d=150,"
     "bandpass=f=1800:w=1600[s];"
     # Hats: bright noise on the eighths.
-    "aevalsrc='0.35*(2*random(1)-1)*exp(-mod(t,0.25)*70)':s=44100:d=40,highpass=f=7000[h];"
+    "aevalsrc='0.35*(2*random(1)-1)*exp(-mod(t,0.25)*70)':s=44100:d=150,highpass=f=7000[h];"
     # A low pad under it.
-    "aevalsrc='0.10*sin(2*PI*110*t)+0.08*sin(2*PI*164.8*t)+0.06*sin(2*PI*220*t)':s=44100:d=40[p];"
+    "aevalsrc='0.10*sin(2*PI*110*t)+0.08*sin(2*PI*164.8*t)+0.06*sin(2*PI*220*t)':s=44100:d=150[p];"
     "[k][s][h][p]amix=inputs=4:normalize=0,alimiter=limit=0.9[out]"
 )
 

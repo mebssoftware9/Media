@@ -17,9 +17,19 @@ OUT=screens
 DBG=$OUT/debug
 mkdir -p "$OUT" "$DBG"
 
+# --compressed skips uiautomator's "not accessibility friendly" check, which
+# crashes on Compose screens (NullPointerException in nafCheck) and left the
+# Reactive artwork card untapped over every world. Tried twice.
 dump() {
-  adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
-  adb pull /sdcard/ui.xml "$DBG/ui.xml" >/dev/null 2>&1
+  local i
+  rm -f "$DBG/ui.xml"
+  for i in 1 2; do
+    adb shell rm -f /sdcard/ui.xml >/dev/null 2>&1
+    adb shell uiautomator dump --compressed /sdcard/ui.xml >/dev/null 2>&1
+    adb pull /sdcard/ui.xml "$DBG/ui.xml" >/dev/null 2>&1 && [ -s "$DBG/ui.xml" ] && return 0
+    sleep 1
+  done
+  return 1
 }
 
 # Taps the first element showing LABEL, if there is one. Returns 1 if not found.
@@ -111,7 +121,8 @@ for world in night_rain fireflies ocean cosmos dream embers minimal; do
     # The first time Now Playing opens it offers Reactive artwork: turn it on,
     # so the cover moves with the beat as well as the world around it.
     shot 02-reactive-hint
-    tap "Turn it on" && sleep 2
+    tap "Turn it on" || tap "Not now" || echo "no Reactive artwork card found"
+    sleep 2
     first=0
   fi
   sleep 5
