@@ -4,7 +4,9 @@ description is LABEL, or else contains it (any case), from a uiautomator dump.
 
     python3 tools/ui_tap.py ui.xml "Got it"   ->   540 2010
 
-Prints nothing if there is no such element. Used by world_screenshots.sh.
+Prints nothing if there is no such element. A third argument "last" picks
+the last match on screen instead of the first (the mini-player, drawn over
+the list that shows the same title). Used by world_screenshots.sh.
 """
 import re
 import sys
@@ -13,6 +15,7 @@ import xml.etree.ElementTree as ET
 
 def main():
     path, label = sys.argv[1], sys.argv[2].lower()
+    last = len(sys.argv) > 3 and sys.argv[3] == "last"
     try:
         root = ET.parse(path).getroot()
     except Exception:
@@ -26,7 +29,8 @@ def main():
     # card's body ("...you can turn it on any time"), and the body came first.
     exact = [n for n in nodes if label in names(n)]
     loose = [n for n in nodes if any(label in t for t in names(n))]
-    for node in exact + loose:
+    order = (exact[::-1] + loose[::-1]) if last else (exact + loose)
+    for node in order:
         m = re.match(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", node.get("bounds") or "")
         if m:
             x1, y1, x2, y2 = map(int, m.groups())

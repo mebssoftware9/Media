@@ -94,6 +94,38 @@ def main():
         os.remove(png)
         print("made", mp3)
     os.remove(wav)
+    make_audiobook(os.path.join(out, "book"))
+
+
+BOOK_CHAPTERS = ["Opening", "The Long Road", "A Quiet Town", "Rain at Night", "Home Again"]
+
+
+def make_audiobook(out):
+    """A four-minute 'audiobook' with five chapters (ID3 CHAP frames), for
+    the skip buttons, the chapter line and the Chapters and bookmarks sheet.
+    Pushed under Audiobooks/, which is how the library knows it is one."""
+    os.makedirs(out, exist_ok=True)
+    meta = os.path.join(out, "chapters.txt")
+    step = 48_000
+    with open(meta, "w") as f:
+        f.write(";FFMETADATA1\ntitle=The Living Worlds\nartist=Via Test Narrator\nalbum=The Living Worlds\n")
+        for i, t in enumerate(BOOK_CHAPTERS):
+            f.write("[CHAPTER]\nTIMEBASE=1/1000\nSTART=%d\nEND=%d\ntitle=%s\n" % (i * step, (i + 1) * step, t))
+    png = os.path.join(out, "cover.png")
+    cover_png(0x3A1C71, 0xD76D77, png)
+    mp3 = os.path.join(out, "living_worlds_audiobook.mp3")
+    # A voice-like murmur: a low tone wobbling in pitch and level.
+    voice = "aevalsrc='0.25*sin(2*PI*t*(140+30*sin(2*PI*t*3)))*(0.6+0.4*sin(2*PI*t*0.7))':s=22050:d=%d" % (len(BOOK_CHAPTERS) * step // 1000)
+    subprocess.run([
+        "ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i", voice, "-i", meta, "-i", png,
+        "-map", "0:a", "-map", "2:v", "-map_metadata", "1", "-map_chapters", "1",
+        "-c:a", "libmp3lame", "-b:a", "48k", "-ac", "1",
+        "-c:v", "png", "-disposition:v", "attached_pic", "-id3v2_version", "3",
+        mp3,
+    ], check=True)
+    os.remove(meta)
+    os.remove(png)
+    print("made", mp3)
 
 
 if __name__ == "__main__":

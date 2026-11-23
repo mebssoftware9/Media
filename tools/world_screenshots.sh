@@ -36,7 +36,7 @@ dump() {
 tap() {
   dump || return 1
   local xy
-  xy=$(python3 tools/ui_tap.py "$DBG/ui.xml" "$1")
+  xy=$(python3 tools/ui_tap.py "$DBG/ui.xml" "$1" "${2:-}")
   [ -z "$xy" ] && return 1
   echo "tap '$1' at $xy"
   adb shell input tap $xy
@@ -98,6 +98,9 @@ adb shell cmd media_session volume --stream 3 --set 12 >/dev/null 2>&1 || \
 adb install -r -g "$APK"
 adb shell mkdir -p /sdcard/Music/ViaWorlds
 for f in "$TRACKS"/*.mp3; do adb push "$f" /sdcard/Music/ViaWorlds/ >/dev/null; done
+# The test audiobook, where the library looks for audiobooks.
+adb shell mkdir -p /sdcard/Audiobooks/ViaTest
+for f in "$TRACKS"/book/*.mp3; do adb push "$f" /sdcard/Audiobooks/ViaTest/ >/dev/null; done
 adb shell content call --uri content://media --method scan_volume --arg external_primary >/dev/null 2>&1 || true
 sleep 3
 adb logcat -c || true
@@ -133,6 +136,38 @@ for world in night_rain fireflies ocean cosmos dream embers minimal; do
   adb shell screenrecord --time-limit 6 --bit-rate 6000000 "/sdcard/$world.mp4" || true
   adb pull "/sdcard/$world.mp4" "$OUT/world-$world.mp4" >/dev/null 2>&1 || true
 done
+
+# ---- The new Home, after the songs above have played ----
+adb shell input keyevent 4 && sleep 2           # Now Playing down to the mini-player
+tap "Music" && sleep 3
+shot 10-home
+adb shell input swipe 540 1700 540 900 400 && sleep 2
+shot 11-home-scrolled
+adb shell input swipe 540 900 540 1700 400 && sleep 1
+
+# ---- Search: one search made, then the recent list ----
+tap "Search" && sleep 2
+adb shell input text "cosmos" && sleep 1
+adb shell input keyevent 66 && sleep 2
+shot 30-search-results
+tap "Clear" && sleep 2
+shot 31-search-recent
+adb shell input keyevent 4 && sleep 1
+adb shell input keyevent 4 && sleep 2
+
+# ---- An audiobook from the library: skip buttons, chapter line, chapters ----
+tap "Audiobooks" && sleep 3
+shot 20-audiobooks-home
+tap "The Living Worlds" && sleep 4
+tap "The Living Worlds" last && sleep 4           # the mini-player, up to Now Playing
+shot 21-audiobook-playing
+tap "Forward 30 seconds" && sleep 2
+tap "Forward 30 seconds" && sleep 2
+shot 22-audiobook-chapter
+tap "Chapters and bookmarks" && sleep 3
+tap "Add a bookmark" && sleep 2
+shot 23-chapters-sheet
+adb shell input keyevent 4 && sleep 2
 
 adb logcat -d > "$DBG/logcat.txt" 2>/dev/null || true
 grep -E "FATAL|AndroidRuntime|ANR in" "$DBG/logcat.txt" | head -40 || true
