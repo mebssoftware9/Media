@@ -430,6 +430,9 @@
     <string name="hero_rediscover">Redécouvrir</string>
     <string name="hero_journey">Votre voyage musical</string>
     <string name="hero_jump_back_in">Reprendre</string>
+    <string name="art_mode_still">Pochette : fixe. Touchez pour qu\'elle bouge avec la musique</string>
+    <string name="art_mode_reactive">La pochette bouge avec la musique. Touchez pour la masquer</string>
+    <string name="art_mode_hidden">Pochette masquée, le monde remplit l\'écran. Touchez pour la remettre</string>
     <string name="search_empty_hint">Trouvez n\'importe quoi dans votre bibliothèque</string>
     <string name="search_no_matches_title">Aucun résultat dans votre bibliothèque</string>
     <string name="search_no_matches_body">Rien ne correspond à « %1$s ».</string>

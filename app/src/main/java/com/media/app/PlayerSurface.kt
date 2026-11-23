@@ -37,6 +37,9 @@ import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.Replay10
 import androidx.compose.material.icons.filled.Forward30
 import androidx.compose.material.icons.outlined.Bookmarks
+import androidx.compose.material.icons.outlined.Image
+import androidx.compose.material.icons.filled.Landscape
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -141,6 +144,16 @@ fun PlayerSurface(
     var showSpeedSheet by remember { mutableStateOf(false) }
     // Podcasts and audiobooks: the file's own chapters, and the listener's bookmarks.
     var showMarks by remember { mutableStateOf(false) }
+    // The artwork button: still cover -> reactive cover -> no cover, so the
+    // Living World has the whole screen. The same settings as Settings uses.
+    val artCtx = androidx.compose.ui.platform.LocalContext.current
+    val artScope = rememberCoroutineScope()
+    val reactiveArt by remember(artCtx) { SettingsStore.reactiveArtFlow(artCtx) }.collectAsState(initial = false)
+    val hideCover by remember(artCtx) { SettingsStore.hideCoverFlow(artCtx) }.collectAsState(initial = false)
+    val coverGone by animateFloatAsState(
+        if (hideCover && !state.isVideo) 1f else 0f, tween(700), label = "coverGone"
+    )
+    val artMode = when { hideCover -> 2; reactiveArt -> 1; else -> 0 }
     val chapters = rememberChapters(state.currentUri, state.longForm && !state.isVideo)
     // Lyrics take the artwork's place rather than opening a new screen: the
     // words belong with the music, and the transport stays under the thumb.
@@ -363,7 +376,8 @@ fun PlayerSurface(
                 e = e, q = q, isVideo = state.isVideo, lyr = lyr,
                 beat = beat, tilt = tilt, glow = glow,
                 artX = artX, artY = artY, artW = artW, artH = artH, artCorner = artCorner,
-                artItem = artItem, reduced = reduced, videoSurface = videoSurface, vm = vm
+                artItem = artItem, reduced = reduced, videoSurface = videoSurface, vm = vm,
+                coverGone = coverGone
             )
 
             // ---------------- collapsed chrome ----------------
@@ -379,7 +393,9 @@ fun PlayerSurface(
                     onFullscreen = onFullscreen,
                     onToggleLyrics = { showLyrics = !showLyrics },
                     onOpenSound = onOpenSound,
-                    onOpenQueue = { showQueue = true }
+                    onOpenQueue = { showQueue = true },
+                    artMode = artMode,
+                    onCycleArt = { artScope.launch { SettingsStore.cycleArtwork(artCtx) } }
                 )
 
                 // Text over a coloured backdrop gets a soft shadow so it holds
@@ -400,7 +416,9 @@ fun PlayerSurface(
                         tint = npAccent,
                         modifier = Modifier.fillMaxSize()
                             .padding(top = statusTopL + 56.dp, bottom = with(density) { controlsPx.value.toDp() })
-                            .alpha(fullAlpha * lyr)
+                            .alpha(fullAlpha * lyr),
+                        playing = state.isPlaying,
+                        beat = beat
                     )
                 }
 
@@ -806,7 +824,8 @@ private fun PlayerArtwork(
     artItem: AppMediaItem?,
     reduced: Boolean,
     videoSurface: Boolean,
-    vm: PlayerViewModel
+    vm: PlayerViewModel,
+    coverGone: Float = 0f
 ) {
     val density = LocalDensity.current
     // Outside the layer lambda: in there `density` would be the
@@ -835,10 +854,14 @@ private fun PlayerArtwork(
                 // kick: out in 30ms, settled before the next beat
                 // (BeatPulse.kt). Everything else that moves with the kick
                 // reads this same value.
-                val s = (1f + beat.cone * coneScale).coerceAtLeast(0.985f)
+                // Immersive (the artwork button's third state): the cover
+                // steps back and fades, only once it is the hero - the
+                // pill always keeps its thumbnail.
+                val away = coverGone * ((e - 0.5f) * 2f).coerceIn(0f, 1f)
+                val s = (1f + beat.cone * coneScale).coerceAtLeast(0.985f) * (1f - 0.12f * away)
                 scaleX = s; scaleY = s
                 // Gives way to the lyrics; the pill keeps its cover.
-                alpha = 1f - lyr * e
+                alpha = (1f - lyr * e) * (1f - away)
                 // Premium and Ultra: the cover tilts with the phone,
                 // a few degrees, only once it is the hero.
                 if (q.parallax) {
@@ -1058,7 +1081,9 @@ private fun NowPlayingTopBar(
     onFullscreen: () -> Unit,
     onToggleLyrics: () -> Unit,
     onOpenSound: () -> Unit,
-    onOpenQueue: () -> Unit
+    onOpenQueue: () -> Unit,
+    artMode: Int,
+    onCycleArt: () -> Unit
 ) {
     Row(
         Modifier.fillMaxWidth().statusBarsPadding()
@@ -1098,6 +1123,25 @@ private fun NowPlayingTopBar(
         // Video has no favourites concept here and the row is
         // already carrying fullscreen + PiP.
         if (!state.isVideo) {
+            // The artwork: still, moving with the music, or gone so the
+            // world fills the screen. Lit while it is anything but still.
+            Icon(
+                when (artMode) {
+                    2 -> Icons.Filled.Landscape
+                    1 -> Icons.Filled.AutoAwesome
+                    else -> Icons.Outlined.Image
+                },
+                stringResource(
+                    when (artMode) {
+                        2 -> R.string.art_mode_hidden
+                        1 -> R.string.art_mode_reactive
+                        else -> R.string.art_mode_still
+                    }
+                ),
+                tint = if (artMode != 0) MediaColors.Accent else MediaColors.Cream,
+                modifier = Modifier.size(24.dp).pressScale(haptic = true, onClick = onCycleArt)
+            )
+            Spacer(Modifier.width(Space.md))
             Icon(
                 Icons.Filled.Lyrics, stringResource(if (showLyrics) R.string.action_hide_lyrics else R.string.action_lyrics),
                 tint = if (showLyrics) MediaColors.Accent else MediaColors.Cream,
@@ -1154,36 +1198,23 @@ private fun BoxScope.NowPlayingControls(
             .onSizeChanged { controlsPx.value = it.height }
             .navigationBarsPadding().alpha(fullAlpha)
     ) {
-        // The line being sung, under the artwork, the way Spotify
-        // shows it. Only for real synced lyrics, and hidden while
+        // The line being sung, under the artwork: it fills with colour as it
+        // is sung, swells on the kick, and the next line waits below it
+        // (ReactiveLyrics.kt). Only for real synced lyrics, and hidden while
         // the full lyrics are open. Tap opens them.
-        val nowLine = remember(previewLyrics, state.positionMs, previewOffset) {
-            (previewLyrics as? LyricsState.Synced)?.lines?.let { lines ->
-                Lrc.activeIndex(lines, state.positionMs, previewOffset)
-                    .takeIf { it >= 0 }?.let { lines[it].text }
-            }
-        }
-        if (!state.isVideo && !showLyrics && previewLyrics is LyricsState.Synced) {
-            androidx.compose.animation.AnimatedContent(
-                targetState = nowLine.orEmpty(),
-                transitionSpec = {
-                    (fadeIn(tween(Motion.Standard)) togetherWith fadeOut(tween(Motion.Fast)))
-                },
-                label = "lyricLine",
+        val synced = previewLyrics as? LyricsState.Synced
+        if (!state.isVideo && !showLyrics && synced != null) {
+            SungLine(
+                lines = synced.lines,
+                statePositionMs = state.positionMs,
+                playing = state.isPlaying,
+                offsetMs = previewOffset,
+                accent = npAccent,
+                beat = beat,
                 modifier = Modifier.fillMaxWidth()
-                    .padding(start = Space.xl, end = Space.xl, bottom = Space.md)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null
-                    ) { onOpenLyrics() }
-            ) { line ->
-                Text(
-                    line.ifBlank { "\u266A" },
-                    style = Typo.Primary.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold),
-                    color = MediaColors.Cream,
-                    maxLines = 2, overflow = TextOverflow.Ellipsis
-                )
-            }
+                    .padding(start = Space.xl, end = Space.xl, bottom = Space.md),
+                onClick = onOpenLyrics
+            )
         }
         NowPlayingTitle(
             state = state, showLyrics = showLyrics, titleShadow = titleShadow, source = source,

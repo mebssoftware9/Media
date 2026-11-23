@@ -430,6 +430,9 @@
     <string name="hero_rediscover">Neu entdecken</string>
     <string name="hero_journey">Deine Musikreise</string>
     <string name="hero_jump_back_in">Weiterhören, wo du warst</string>
+    <string name="art_mode_still">Cover: still. Tippen, damit es sich mit der Musik bewegt</string>
+    <string name="art_mode_reactive">Cover bewegt sich mit der Musik. Tippen zum Ausblenden</string>
+    <string name="art_mode_hidden">Cover ausgeblendet, die Welt füllt den Bildschirm. Tippen, um es zurückzuholen</string>
     <string name="search_empty_hint">Finde alles in deiner Mediathek</string>
     <string name="search_no_matches_title">Keine Treffer in deiner Mediathek</string>
     <string name="search_no_matches_body">Nichts passt zu „%1$s“.</string>

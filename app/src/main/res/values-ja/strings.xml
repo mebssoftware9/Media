@@ -415,6 +415,9 @@
     <string name="hero_rediscover">再発見</string>
     <string name="hero_journey">あなたの音楽の旅</string>
     <string name="hero_jump_back_in">もう一度聴く</string>
+    <string name="art_mode_still">アートワーク：静止。タップで音楽に合わせて動きます</string>
+    <string name="art_mode_reactive">アートワークが音楽に合わせて動きます。タップで非表示</string>
+    <string name="art_mode_hidden">アートワーク非表示：ワールドが画面いっぱいに。タップで戻します</string>
     <string name="search_empty_hint">ライブラリから何でも探せます</string>
     <string name="search_no_matches_title">ライブラリに一致するものはありません</string>
     <string name="search_no_matches_body">「%1$s」に一致するものはありません。</string>

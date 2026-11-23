@@ -415,6 +415,9 @@
     <string name="hero_rediscover">Temukan lagi</string>
     <string name="hero_journey">Perjalanan musikmu</string>
     <string name="hero_jump_back_in">Lanjutkan lagi</string>
+    <string name="art_mode_still">Sampul: diam. Ketuk agar bergerak mengikuti musik</string>
+    <string name="art_mode_reactive">Sampul bergerak mengikuti musik. Ketuk untuk menyembunyikan</string>
+    <string name="art_mode_hidden">Sampul disembunyikan, dunia memenuhi layar. Ketuk untuk menampilkannya lagi</string>
     <string name="search_empty_hint">Temukan apa saja di koleksimu</string>
     <string name="search_no_matches_title">Tidak ada yang cocok di koleksimu</string>
     <string name="search_no_matches_body">Tidak ada yang cocok dengan “%1$s”.</string>

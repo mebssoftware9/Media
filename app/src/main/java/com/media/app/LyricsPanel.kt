@@ -112,7 +112,11 @@ fun LyricsPanel(
     onEnableOnline: () -> Unit,
     // The cover's accent, so the glow and the SYNCED mark match the song.
     tint: Color? = null,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    // Reactive lyrics (ReactiveLyrics.kt): the sweep follows the player's
+    // clock while playing, and the sung line swells with the kick.
+    playing: Boolean = false,
+    beat: BeatState? = null
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -152,6 +156,7 @@ fun LyricsPanel(
             LyricsState.Loading -> Centered(stringResource(R.string.lyrics_looking))
             is LyricsState.Synced -> Synced(
                 lines = s.lines, source = s.source, positionMs = positionMs, offsetMs = offset,
+                playing = playing, beat = beat,
                 accent = tint ?: MediaColors.Accent,
                 onSeek = onSeek, onMore = { showActions = true }
             ) { delta ->
@@ -267,6 +272,8 @@ private fun Modifier.edgeFade(): Modifier = this
 
 @Composable
 private fun Synced(
+    playing: Boolean,
+    beat: BeatState?,
     lines: List<LyricLine>,
     source: LyricsSource,
     positionMs: Long,
@@ -276,7 +283,8 @@ private fun Synced(
     onMore: () -> Unit,
     onNudge: (Long) -> Unit
 ) {
-    val active = Lrc.activeIndex(lines, positionMs, offsetMs)
+    val smooth by rememberSmoothPosition(positionMs, playing)
+    val active = Lrc.activeIndex(lines, smooth, offsetMs)
     val list = rememberLazyListState()
     val density = LocalDensity.current
     val q = LocalQuality.current
@@ -321,14 +329,15 @@ private fun Synced(
                     val base = Typo.Section
                     Text(
                         text = line.text.ifBlank { "♪" },
-                        style = if (isNow) base.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            shadow = if (glow) Shadow(accent.copy(alpha = 0.55f), blurRadius = 28f) else null
+                        style = if (isNow) activeLyricStyle(
+                            base, lineProgress(lines, i, smooth, offsetMs), accent, MediaColors.Cream, glow
                         ) else base,
                         color = color,
                         modifier = Modifier.fillMaxWidth()
                             .graphicsLayer {
-                                scaleX = scale; scaleY = scale
+                                // The sung line swells a little on each kick.
+                                val k = if (isNow) (beat?.push ?: 0f) else 0f
+                                scaleX = scale * (1f + 0.04f * k); scaleY = scale * (1f + 0.04f * k)
                                 transformOrigin = TransformOrigin(0f, 0.5f)
                             }
                             .then(if (soft > 0f) Modifier.blur(soft.dp, BlurredEdgeTreatment.Unbounded) else Modifier)

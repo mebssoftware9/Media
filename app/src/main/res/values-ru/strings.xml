@@ -460,6 +460,9 @@
     <string name="hero_rediscover">Открыть заново</string>
     <string name="hero_journey">Ваше музыкальное путешествие</string>
     <string name="hero_jump_back_in">Вернуться</string>
+    <string name="art_mode_still">Обложка неподвижна. Нажмите, чтобы она двигалась под музыку</string>
+    <string name="art_mode_reactive">Обложка движется под музыку. Нажмите, чтобы скрыть</string>
+    <string name="art_mode_hidden">Обложка скрыта, мир заполняет экран. Нажмите, чтобы вернуть</string>
     <string name="search_empty_hint">Найдите что угодно в своей медиатеке</string>
     <string name="search_no_matches_title">В медиатеке ничего не найдено</string>
     <string name="search_no_matches_body">Ничего не подходит под «%1$s».</string>

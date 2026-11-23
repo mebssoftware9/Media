@@ -415,6 +415,9 @@
     <string name="hero_rediscover">Khám phá lại</string>
     <string name="hero_journey">Hành trình âm nhạc</string>
     <string name="hero_jump_back_in">Nghe lại</string>
+    <string name="art_mode_still">Ảnh bìa: tĩnh. Chạm để ảnh chuyển động theo nhạc</string>
+    <string name="art_mode_reactive">Ảnh bìa chuyển động theo nhạc. Chạm để ẩn</string>
+    <string name="art_mode_hidden">Đã ẩn ảnh bìa, thế giới phủ kín màn hình. Chạm để hiện lại</string>
     <string name="search_empty_hint">Tìm bất cứ thứ gì trong thư viện của bạn</string>
     <string name="search_no_matches_title">Không có kết quả trong thư viện</string>
     <string name="search_no_matches_body">Không có gì ở đây khớp với “%1$s”.</string>

@@ -29,6 +29,7 @@ object SettingsStore {
     private val REVEAL_SEEN = booleanPreferencesKey("library_reveal_seen")
     private val PLAYER_HINT = booleanPreferencesKey("player_hint_seen")
     private val REACTIVE_ART = booleanPreferencesKey("reactive_artwork")
+    private val HIDE_COVER = booleanPreferencesKey("hide_cover")
     private val QUALITY = stringPreferencesKey("display_quality")
     private val WORLD = stringPreferencesKey("living_world")
     private val AVATAR = longPreferencesKey("avatar_stamp")
@@ -103,6 +104,24 @@ object SettingsStore {
 
     suspend fun setReactiveArt(context: Context, value: Boolean) {
         context.dataStore.edit { it[REACTIVE_ART] = value }
+    }
+
+    // The third state of Now Playing's artwork button: the cover steps
+    // aside and the Living World has the whole screen. Off by default.
+    fun hideCoverFlow(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { it[HIDE_COVER] ?: false }
+
+    /** The artwork button: still cover -> reactive cover -> no cover -> still cover. */
+    suspend fun cycleArtwork(context: Context) {
+        context.dataStore.edit {
+            val reactive = it[REACTIVE_ART] ?: false
+            val hidden = it[HIDE_COVER] ?: false
+            when {
+                hidden -> { it[HIDE_COVER] = false; it[REACTIVE_ART] = false }
+                reactive -> it[HIDE_COVER] = true
+                else -> it[REACTIVE_ART] = true
+            }
+        }
     }
 
     // Living Worlds (LivingWorld.kt). ON (Auto) by default, unlike Reactive

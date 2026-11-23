@@ -434,6 +434,9 @@
     <string name="hero_rediscover">Rediscover</string>
     <string name="hero_journey">Your music journey</string>
     <string name="hero_jump_back_in">Jump back in</string>
+    <string name="art_mode_still">Artwork: still. Tap to make it move with the music</string>
+    <string name="art_mode_reactive">Artwork moves with the music. Tap to hide it</string>
+    <string name="art_mode_hidden">Artwork hidden, the world fills the screen. Tap to bring it back</string>
     <string name="search_empty_hint">Find anything in your library</string>
     <string name="search_no_matches_title">No matches in your library</string>
     <string name="search_no_matches_body">Nothing here matches “%1$s”.</string>

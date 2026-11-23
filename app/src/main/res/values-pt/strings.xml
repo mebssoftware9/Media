@@ -430,6 +430,9 @@
     <string name="hero_rediscover">Redescubra</string>
     <string name="hero_journey">Sua jornada musical</string>
     <string name="hero_jump_back_in">Volte a ouvir</string>
+    <string name="art_mode_still">Capa: parada. Toque para ela se mover com a música</string>
+    <string name="art_mode_reactive">A capa se move com a música. Toque para ocultá-la</string>
+    <string name="art_mode_hidden">Capa oculta, o mundo preenche a tela. Toque para trazê-la de volta</string>
     <string name="search_empty_hint">Encontre qualquer coisa na sua biblioteca</string>
     <string name="search_no_matches_title">Nenhum resultado na sua biblioteca</string>
     <string name="search_no_matches_body">Nada aqui corresponde a “%1$s”.</string>
