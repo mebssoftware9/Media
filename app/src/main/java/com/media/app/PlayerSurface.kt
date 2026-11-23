@@ -364,7 +364,9 @@ fun PlayerSurface(
                 backdropItem = libraryItem ?: artItem, artColors = artColors,
                 beat = beat, tilt = tilt, ambient = ambient, glow = glow, heightPx = heightPx,
                 artX = artX, artY = artY, artW = artW, artH = artH, world = world,
-                speaker = speaker
+                // No cover in the middle (speaker or hidden): no rings or
+                // light around where it was.
+                noRings = speaker || (hideCover && !state.isVideo)
             )
 
             PlayerArtwork(
@@ -649,9 +651,9 @@ private fun BoxScope.PlayerLight(
     artW: androidx.compose.ui.unit.Dp,
     artH: androidx.compose.ui.unit.Dp,
     world: WorldFeed?,
-    // The speaker is showing: the driver does the moving, so the rings
-    // and the light behind the cover stay off.
-    speaker: Boolean = false
+    // The speaker is showing, or the cover is hidden: the rings and the
+    // light behind the cover stay off with it.
+    noRings: Boolean = false
 ) {
     val density = LocalDensity.current
     val ink = MediaColors.Ink
@@ -717,7 +719,7 @@ private fun BoxScope.PlayerLight(
     // behind it rather than a ring stuck on top.
     // Shockwave rings ride outside the bloom and are always mounted
     // while expanded — they animate off their own birth timestamps.
-    if (e > 0.5f && q.reactiveLevel >= 2 && !speaker) {
+    if (e > 0.5f && q.reactiveLevel >= 2 && !noRings) {
         // Full-size layer, centre computed from the artwork rather than
         // from the Canvas. The old version sized its box to ~1.5x the
         // screen and offset it negative, so Compose clamped it and the
@@ -737,7 +739,7 @@ private fun BoxScope.PlayerLight(
     // Every tier lights the cover from behind: one texture draw a frame is
     // cheap, and it is what makes the cover feel lit rather than merely
     // bouncing.
-    if (e > 0.35f && q.reactiveLevel >= 1 && !isVideo && !speaker) {
+    if (e > 0.35f && q.reactiveLevel >= 1 && !isVideo && !noRings) {
         // A Canvas, not a Box with a conditional background: `if
         // (level > 0.01f)` was a COMPOSITION-level branch on a value
         // that changes 60x/second, so this mounted and unmounted every
