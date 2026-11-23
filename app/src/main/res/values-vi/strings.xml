@@ -409,6 +409,12 @@
     <string name="search_hint">Tìm trong thư viện của bạn</string>
     <string name="search_recent">Tìm kiếm gần đây</string>
     <string name="search_recent_remove">Xoá khỏi tìm kiếm gần đây</string>
+    <string name="hero_play_now">Phát ngay</string>
+    <string name="hero_continue">Nghe tiếp</string>
+    <string name="hero_most_played">Nghe nhiều nhất</string>
+    <string name="hero_rediscover">Khám phá lại</string>
+    <string name="hero_journey">Hành trình âm nhạc</string>
+    <string name="hero_jump_back_in">Nghe lại</string>
     <string name="search_empty_hint">Tìm bất cứ thứ gì trong thư viện của bạn</string>
     <string name="search_no_matches_title">Không có kết quả trong thư viện</string>
     <string name="search_no_matches_body">Không có gì ở đây khớp với “%1$s”.</string>

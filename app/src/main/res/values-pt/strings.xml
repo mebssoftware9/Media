@@ -424,6 +424,12 @@
     <string name="search_hint">Busque na sua biblioteca</string>
     <string name="search_recent">Pesquisas recentes</string>
     <string name="search_recent_remove">Remover das pesquisas recentes</string>
+    <string name="hero_play_now">Tocar agora</string>
+    <string name="hero_continue">Continuar ouvindo</string>
+    <string name="hero_most_played">Seus mais ouvidos</string>
+    <string name="hero_rediscover">Redescubra</string>
+    <string name="hero_journey">Sua jornada musical</string>
+    <string name="hero_jump_back_in">Volte a ouvir</string>
     <string name="search_empty_hint">Encontre qualquer coisa na sua biblioteca</string>
     <string name="search_no_matches_title">Nenhum resultado na sua biblioteca</string>
     <string name="search_no_matches_body">Nada aqui corresponde a “%1$s”.</string>

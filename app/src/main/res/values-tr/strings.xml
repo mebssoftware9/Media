@@ -424,6 +424,12 @@
     <string name="search_hint">Kitaplığında ara</string>
     <string name="search_recent">Son aramalar</string>
     <string name="search_recent_remove">Son aramalardan kaldır</string>
+    <string name="hero_play_now">Şimdi çal</string>
+    <string name="hero_continue">Dinlemeye devam et</string>
+    <string name="hero_most_played">En çok dinlediklerin</string>
+    <string name="hero_rediscover">Yeniden keşfet</string>
+    <string name="hero_journey">Müzik yolculuğun</string>
+    <string name="hero_jump_back_in">Kaldığın yerden</string>
     <string name="search_empty_hint">Kitaplığında her şeyi bul</string>
     <string name="search_no_matches_title">Kitaplığında eşleşme yok</string>
     <string name="search_no_matches_body">Burada “%1$s” ile eşleşen bir şey yok.</string>

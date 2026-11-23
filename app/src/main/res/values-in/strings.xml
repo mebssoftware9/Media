@@ -409,6 +409,12 @@
     <string name="search_hint">Cari di koleksimu</string>
     <string name="search_recent">Pencarian terbaru</string>
     <string name="search_recent_remove">Hapus dari pencarian terbaru</string>
+    <string name="hero_play_now">Putar sekarang</string>
+    <string name="hero_continue">Lanjutkan mendengarkan</string>
+    <string name="hero_most_played">Paling sering diputar</string>
+    <string name="hero_rediscover">Temukan lagi</string>
+    <string name="hero_journey">Perjalanan musikmu</string>
+    <string name="hero_jump_back_in">Lanjutkan lagi</string>
     <string name="search_empty_hint">Temukan apa saja di koleksimu</string>
     <string name="search_no_matches_title">Tidak ada yang cocok di koleksimu</string>
     <string name="search_no_matches_body">Tidak ada yang cocok dengan “%1$s”.</string>

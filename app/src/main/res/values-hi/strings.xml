@@ -424,6 +424,12 @@
     <string name="search_hint">अपनी लाइब्रेरी में खोजें</string>
     <string name="search_recent">हाल की खोजें</string>
     <string name="search_recent_remove">हाल की खोजों से हटाएँ</string>
+    <string name="hero_play_now">अभी चलाएँ</string>
+    <string name="hero_continue">सुनना जारी रखें</string>
+    <string name="hero_most_played">आपके सबसे ज़्यादा सुने गए</string>
+    <string name="hero_rediscover">फिर से खोजें</string>
+    <string name="hero_journey">आपकी संगीत यात्रा</string>
+    <string name="hero_jump_back_in">फिर से सुनें</string>
     <string name="search_empty_hint">अपनी लाइब्रेरी में कुछ भी ढूँढें</string>
     <string name="search_no_matches_title">आपकी लाइब्रेरी में कोई मेल नहीं</string>
     <string name="search_no_matches_body">यहाँ “%1$s” से कुछ मेल नहीं खाता।</string>

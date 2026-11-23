@@ -428,6 +428,12 @@
     <string name="search_hint">Search your library</string>
     <string name="search_recent">Recent searches</string>
     <string name="search_recent_remove">Remove from recent searches</string>
+    <string name="hero_play_now">Play now</string>
+    <string name="hero_continue">Continue listening</string>
+    <string name="hero_most_played">Your most played</string>
+    <string name="hero_rediscover">Rediscover</string>
+    <string name="hero_journey">Your music journey</string>
+    <string name="hero_jump_back_in">Jump back in</string>
     <string name="search_empty_hint">Find anything in your library</string>
     <string name="search_no_matches_title">No matches in your library</string>
     <string name="search_no_matches_body">Nothing here matches “%1$s”.</string>

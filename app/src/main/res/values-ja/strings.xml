@@ -409,6 +409,12 @@
     <string name="search_hint">ライブラリを検索</string>
     <string name="search_recent">最近の検索</string>
     <string name="search_recent_remove">最近の検索から削除</string>
+    <string name="hero_play_now">今すぐ再生</string>
+    <string name="hero_continue">続きを聴く</string>
+    <string name="hero_most_played">よく聴いている</string>
+    <string name="hero_rediscover">再発見</string>
+    <string name="hero_journey">あなたの音楽の旅</string>
+    <string name="hero_jump_back_in">もう一度聴く</string>
     <string name="search_empty_hint">ライブラリから何でも探せます</string>
     <string name="search_no_matches_title">ライブラリに一致するものはありません</string>
     <string name="search_no_matches_body">「%1$s」に一致するものはありません。</string>

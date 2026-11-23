@@ -424,6 +424,12 @@
     <string name="search_hint">In deiner Mediathek suchen</string>
     <string name="search_recent">Letzte Suchen</string>
     <string name="search_recent_remove">Aus letzten Suchen entfernen</string>
+    <string name="hero_play_now">Jetzt abspielen</string>
+    <string name="hero_continue">Weiterhören</string>
+    <string name="hero_most_played">Am meisten gehört</string>
+    <string name="hero_rediscover">Neu entdecken</string>
+    <string name="hero_journey">Deine Musikreise</string>
+    <string name="hero_jump_back_in">Weiterhören, wo du warst</string>
     <string name="search_empty_hint">Finde alles in deiner Mediathek</string>
     <string name="search_no_matches_title">Keine Treffer in deiner Mediathek</string>
     <string name="search_no_matches_body">Nichts passt zu „%1$s“.</string>

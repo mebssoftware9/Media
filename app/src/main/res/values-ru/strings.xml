@@ -454,6 +454,12 @@
     <string name="search_hint">Поиск по медиатеке</string>
     <string name="search_recent">Недавние запросы</string>
     <string name="search_recent_remove">Удалить из недавних запросов</string>
+    <string name="hero_play_now">Слушать</string>
+    <string name="hero_continue">Продолжить</string>
+    <string name="hero_most_played">Чаще всего</string>
+    <string name="hero_rediscover">Открыть заново</string>
+    <string name="hero_journey">Ваше музыкальное путешествие</string>
+    <string name="hero_jump_back_in">Вернуться</string>
     <string name="search_empty_hint">Найдите что угодно в своей медиатеке</string>
     <string name="search_no_matches_title">В медиатеке ничего не найдено</string>
     <string name="search_no_matches_body">Ничего не подходит под «%1$s».</string>

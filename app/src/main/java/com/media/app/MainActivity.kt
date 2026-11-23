@@ -966,6 +966,14 @@ private fun HomeFeed(
             }
         }
         val streak by Retention.streak.collectAsState()
+        // The room behind Home: what is playing, else what was played last,
+        // else the first thing on this page (HomeHero.kt).
+        val atmosphereArt = remember(state.currentUri, lib.lastPlayed, nav.homePillar, byPillar) {
+            state.currentUri?.let { u -> lib.allAudio.firstOrNull { it.uri.toString() == u } }
+                ?: lib.lastPlayed.maxByOrNull { it.value }?.key?.let { lib.allById[it] }?.takeIf { it.type == MediaType.AUDIO }
+                ?: byPillar[nav.homePillar]?.firstOrNull { it.type == MediaType.AUDIO }
+        }
+        HomeAtmosphere(atmosphereArt)
 
         Column(Modifier.fillMaxSize().statusBarsPadding()) {
             // FIXED top region - does not scroll. The header and the bar are
@@ -1049,6 +1057,24 @@ private fun HomeFormatPage(
             .sortedByDescending { lib.lastPlayed[it.id] }
             .take(12)
     }
+    val context = LocalContext.current
+    // One editorial feature at a time (HomeHero.kt): continue, most played,
+    // rediscover. The resume card is the first of them.
+    val slides = remember(inPillar, resume, lib.lastPlayed, lib.playCounts) {
+        heroSlidesFor(
+            pillar = pillar, inPillar = inPillar, resume = resume,
+            lastPlayed = lib.lastPlayed, playCounts = lib.playCounts,
+            subtitleFor = { g ->
+                val who = shownArtist(g.first().artist)
+                if (g.size > 1) who + "  \u00b7  " + context.plural(R.plurals.count_tracks, g.size) else who
+            },
+            play = { list, i ->
+                vm.play(list, i)
+                if (list[i].type == MediaType.VIDEO) nav.showPlayer = true
+            },
+            playAt = { item, ms -> vm.playAt(item, ms) }
+        )
+    }
 
     Column(Modifier.fillMaxSize()) {
         // Present only while a collection opened from Playlists is actually
@@ -1070,14 +1096,8 @@ private fun HomeFormatPage(
                 modifier = Modifier.fillMaxSize()
             ) {
                 item {
-                    resume?.let { (track, pos) ->
-                        ResumeBar(
-                            item = track,
-                            progress = (pos.positionMs.toFloat() / pos.durationMs).coerceIn(0f, 1f),
-                            onPlay = { vm.playAt(track, pos.positionMs) }
-                        )
-                    }
-                    JumpBackIn(
+                    HeroCarousel(slides)
+                    JumpBackInRow(
                         streak = streak,
                         recent = recent,
                         playingUri = state.currentUri,
