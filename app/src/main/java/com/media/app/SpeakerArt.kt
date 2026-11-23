@@ -3,6 +3,7 @@ package com.media.app
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
@@ -30,7 +31,9 @@ import kotlin.math.sin
 // ============================================================================
 //  THE SPEAKER (the artwork button's third state)
 //
-//  The cover becomes the dust cap of a loudspeaker driver, and the driver
+//  A whole studio monitor stands in the cover's place: a graphite cabinet,
+//  a tweeter that flicks on the snare, a bass port, and the woofer with
+//  the cover on its dust cap. The cover becomes the dust cap of a loudspeaker driver, and the driver
 //  moves the way a real one does: the kick drives the cone, which is a
 //  mass on a spring - out fast, back, a little past rest, settled. The
 //  cone, the rubber surround and the cap all move together; the surround's
@@ -79,8 +82,9 @@ private fun rememberExcursion(beat: BeatState, running: Boolean): () -> Float {
 }
 
 /**
- * A loudspeaker driver the size of the cover, [item]'s artwork on its dust
- * cap. [strength] scales the travel: the display tier's reactive level.
+ * A whole loudspeaker in the cover's square: a studio-monitor cabinet with
+ * a tweeter, the woofer ([item]'s artwork on its dust cap) and a bass
+ * port. [strength] scales the travel: the display tier's reactive level.
  */
 @Composable
 fun SpeakerDriver(
@@ -92,26 +96,173 @@ fun SpeakerDriver(
     modifier: Modifier = Modifier
 ) {
     val excursion = rememberExcursion(beat, running)
-    val capSide = side * 0.44f
+    val cabW = side * 0.62f
+    val wooferD = cabW * 0.80f
+    val wooferTop = side * 0.545f - wooferD / 2f
+    val capSide = wooferD * 0.44f
     Box(modifier.size(side).clearAndSetSemantics { }, contentAlignment = Alignment.Center) {
-        // Frame, surround and cone: one canvas, redrawn as the cone moves.
-        Canvas(Modifier.fillMaxSize()) { drawDriver(excursion() * strength) }
-        // The cover on the dust cap, pushed out furthest.
-        if (item != null) {
+        // The shadow the cabinet casts on whatever it stands on.
+        Canvas(Modifier.fillMaxSize()) { drawFloorShadow(cabW.toPx()) }
+        Box(
+            Modifier.size(width = cabW, height = side)
+                .graphicsLayer {
+                    // A heavy kick shivers the whole box, very slightly, the
+                    // way a real cabinet does on a shelf.
+                    translationY = -0.8f * density * excursion().coerceAtLeast(0f) * strength
+                }
+        ) {
+            // Cabinet, baffle, tweeter, port and badge.
+            Canvas(Modifier.fillMaxSize()) {
+                drawCabinet()
+                drawTweeter(tweeterKick(beat) * strength)
+                drawPort()
+            }
+            // The woofer, the cover on its dust cap.
             Box(
-                Modifier.size(capSide)
-                    .graphicsLayer {
-                        val s = 1f + 0.10f * excursion() * strength
-                        scaleX = s; scaleY = s
-                    }
-                    .clip(CircleShape)
+                Modifier.align(Alignment.TopCenter).offset(y = wooferTop).size(wooferD),
+                contentAlignment = Alignment.Center
             ) {
-                CoverArt(item, Modifier.fillMaxSize(), corner = 0, targetPx = 512)
-                // The dome: light from the top left, the rim falling away.
-                Canvas(Modifier.fillMaxSize()) { drawDome(excursion() * strength) }
+                Canvas(Modifier.fillMaxSize()) { drawDriver(excursion() * strength) }
+                if (item != null) {
+                    Box(
+                        Modifier.size(capSide)
+                            .graphicsLayer {
+                                val s = 1f + 0.10f * excursion() * strength
+                                scaleX = s; scaleY = s
+                            }
+                            .clip(CircleShape)
+                    ) {
+                        CoverArt(item, Modifier.fillMaxSize(), corner = 0, targetPx = 512)
+                        // The dome: light from the top left, the rim falling away.
+                        Canvas(Modifier.fillMaxSize()) { drawDome(excursion() * strength) }
+                    }
+                }
             }
         }
     }
+}
+
+/** The tweeter's flick on the snare: out at once, gone in about 90 ms. */
+private fun tweeterKick(beat: BeatState): Float {
+    val hit = beat.snareNanos
+    if (hit == 0L) return 0f
+    val since = beat.frameNanos - hit
+    if (since !in 0..90_000_000L) return 0f
+    val f = 1f - since / 90_000_000f
+    return f * f * beat.snarePower
+}
+
+/** A soft elliptical shadow under the cabinet. */
+private fun DrawScope.drawFloorShadow(cabW: Float) {
+    val cy = size.height * 0.985f
+    val w = cabW * 1.25f
+    drawOval(
+        Brush.radialGradient(
+            listOf(Color.Black.copy(alpha = 0.55f), Color.Transparent),
+            center = Offset(center.x, cy), radius = w / 2f
+        ),
+        topLeft = Offset(center.x - w / 2f, cy - size.height * 0.035f),
+        size = androidx.compose.ui.geometry.Size(w, size.height * 0.07f)
+    )
+}
+
+/** The box: matte graphite, a lit bevel, a recessed baffle and a satin sheen. */
+private fun DrawScope.drawCabinet() {
+    val w = size.width
+    val h = size.height
+    val rad = androidx.compose.ui.geometry.CornerRadius(w * 0.07f)
+    drawRoundRect(
+        Brush.verticalGradient(listOf(Color(0xFF24252A), Color(0xFF141519), Color(0xFF0C0C0E))),
+        cornerRadius = rad
+    )
+    // Satin sheen down the left of the front, as off a studio light.
+    drawRoundRect(
+        Brush.horizontalGradient(
+            0f to Color.White.copy(alpha = 0.045f), 0.35f to Color.White.copy(alpha = 0.015f), 0.6f to Color.Transparent
+        ),
+        cornerRadius = rad
+    )
+    // The bevel: light on the top and left edges, falling off to the right.
+    drawRoundRect(
+        Brush.linearGradient(
+            listOf(Color.White.copy(alpha = 0.22f), Color.White.copy(alpha = 0.04f), Color.Transparent),
+            start = Offset(0f, 0f), end = Offset(w, h)
+        ),
+        cornerRadius = rad, style = Stroke(w * 0.012f)
+    )
+    // The baffle, set a little in, with a shadowed edge.
+    val inset = w * 0.045f
+    val bRad = androidx.compose.ui.geometry.CornerRadius(w * 0.05f)
+    drawRoundRect(
+        Color(0xFF17181C),
+        topLeft = Offset(inset, inset), size = androidx.compose.ui.geometry.Size(w - inset * 2, h - inset * 2),
+        cornerRadius = bRad
+    )
+    drawRoundRect(
+        Color.Black.copy(alpha = 0.6f),
+        topLeft = Offset(inset, inset), size = androidx.compose.ui.geometry.Size(w - inset * 2, h - inset * 2),
+        cornerRadius = bRad, style = Stroke(w * 0.008f)
+    )
+}
+
+/** The tweeter near the top: a machined plate, a waveguide, a small dome. */
+private fun DrawScope.drawTweeter(kick: Float) {
+    val c = Offset(size.width / 2f, size.height * 0.145f)
+    val r = size.width * 0.14f
+    drawCircle(
+        Brush.sweepGradient(
+            0f to Metal2, 0.2f to Metal1, 0.4f to Metal0, 0.6f to Metal1, 0.8f to Metal2, 1f to Metal2, center = c
+        ),
+        radius = r, center = c
+    )
+    drawCircle(Color.White.copy(alpha = 0.10f), radius = r - 0.5f, center = c, style = Stroke(1f))
+    // The waveguide: a shallow dark horn.
+    drawCircle(
+        Brush.radialGradient(
+            listOf(Color(0xFF050506), Color(0xFF1A1B20), Color(0xFF2A2C32)),
+            center = c, radius = r * 0.78f
+        ),
+        radius = r * 0.78f, center = c
+    )
+    // The dome, flicking forward on the snare.
+    val d = r * 0.30f * (1f + 0.12f * kick)
+    drawCircle(
+        Brush.radialGradient(
+            listOf(Color(0xFFD9DDE3), Color(0xFF6B7079), Color(0xFF202126)),
+            center = c - Offset(d * 0.35f, d * 0.4f), radius = d * 1.3f
+        ),
+        radius = d, center = c
+    )
+    // Two small screws on the plate.
+    for (sgn in listOf(-1f, 1f)) {
+        val p = Offset(c.x + sgn * r * 0.90f * 0.7071f, c.y + r * 0.90f * 0.7071f)
+        drawCircle(Color(0xFF4A4E56), radius = r * 0.055f, center = p)
+    }
+}
+
+/** The bass port: a rounded slot near the foot, its lip catching the light. */
+private fun DrawScope.drawPort() {
+    val w = size.width * 0.52f
+    val h = size.height * 0.045f
+    val tl = Offset((size.width - w) / 2f, size.height * 0.875f)
+    val rad = androidx.compose.ui.geometry.CornerRadius(h / 2f)
+    drawRoundRect(
+        Brush.verticalGradient(listOf(Color.Black, Color(0xFF0A0A0C)), startY = tl.y, endY = tl.y + h),
+        topLeft = tl, size = androidx.compose.ui.geometry.Size(w, h), cornerRadius = rad
+    )
+    drawRoundRect(
+        Brush.verticalGradient(listOf(Color.Transparent, Color.White.copy(alpha = 0.12f)), startY = tl.y, endY = tl.y + h),
+        topLeft = tl, size = androidx.compose.ui.geometry.Size(w, h), cornerRadius = rad, style = Stroke(1.2f)
+    )
+    // A small brushed-metal badge below the port.
+    val bw = size.width * 0.14f
+    val bh = size.height * 0.012f
+    drawRoundRect(
+        Brush.horizontalGradient(listOf(Color(0xFF3A3D44), Color(0xFF8C919A), Color(0xFF3A3D44))),
+        topLeft = Offset((size.width - bw) / 2f, size.height * 0.935f),
+        size = androidx.compose.ui.geometry.Size(bw, bh),
+        cornerRadius = androidx.compose.ui.geometry.CornerRadius(bh / 2f)
+    )
 }
 
 private val Metal0 = Color(0xFF2E3036)
