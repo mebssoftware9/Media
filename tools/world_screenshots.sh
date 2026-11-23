@@ -137,6 +137,21 @@ for world in night_rain fireflies ocean cosmos dream embers minimal; do
   adb pull "/sdcard/$world.mp4" "$OUT/world-$world.mp4" >/dev/null 2>&1 || true
 done
 
+# ---- Reactive lyrics, and the artwork button's immersive state ----
+adb shell am start -a android.intent.action.VIEW \
+  -d "file:///sdcard/Music/ViaWorlds/ocean.mp3" -t audio/mpeg -n "$PKG/$ACT" >/dev/null
+sleep 9
+shot 40-sung-line
+burst sung-line
+tap "Tap to hide it" && sleep 3
+shot 41-immersive
+burst immersive
+tap "Tap to bring it back" && sleep 2
+tap "Lyrics" && sleep 3
+shot 42-lyrics
+burst lyrics
+tap "Hide lyrics" && sleep 2
+
 # ---- The new Home, after the songs above have played ----
 adb shell input keyevent 4 && sleep 2           # Now Playing down to the mini-player
 tap "Music" && sleep 3

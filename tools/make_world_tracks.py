@@ -92,9 +92,48 @@ def main():
             mp3,
         ], check=True)
         os.remove(png)
+        add_lyrics(mp3, title)
         print("made", mp3)
     os.remove(wav)
     make_audiobook(os.path.join(out, "book"))
+
+
+LYRIC_LINES = [
+    "Lights come up over the {w}",
+    "Every beat a step closer",
+    "Hold on to the sound",
+    "We move when the bass moves",
+    "Colours running through the night",
+    "Turn it up and let it in",
+    "This is where the music lives",
+    "Stay a little longer",
+]
+
+
+def add_lyrics(mp3, world):
+    """Synced lyrics as LRC text in a real ID3 USLT frame (ffmpeg only
+    writes TXXX), a line every four seconds, so Now Playing has a sung line
+    and the full lyrics something to follow."""
+    lines = []
+    for k in range(0, 37):
+        t = 1.0 + 4.0 * k
+        text = LYRIC_LINES[k % len(LYRIC_LINES)].format(w=world.lower())
+        lines.append("[%02d:%05.2f]%s" % (int(t // 60), t % 60, text))
+    lrc = "\n".join(lines).encode("latin-1")
+    body = b"\x00" + b"eng" + b"\x00" + lrc
+    frame = b"USLT" + struct.pack(">I", len(body)) + b"\x00\x00" + body
+    data = open(mp3, "rb").read()
+    assert data[:3] == b"ID3" and data[3] == 3
+    size = (data[6] << 21) | (data[7] << 14) | (data[8] << 7) | data[9]
+    tag = data[10:10 + size]
+    end = 0  # the frames end where the zero padding starts
+    while end + 10 <= len(tag) and tag[end] != 0:
+        end += 10 + struct.unpack(">I", tag[end + 4:end + 8])[0]
+    tag = tag[:end]
+    new = tag + frame
+    n = len(new)
+    head = b"ID3\x03\x00\x00" + bytes([(n >> 21) & 0x7F, (n >> 14) & 0x7F, (n >> 7) & 0x7F, n & 0x7F])
+    open(mp3, "wb").write(head + new + data[10 + size:])
 
 
 BOOK_CHAPTERS = ["Opening", "The Long Road", "A Quiet Town", "Rain at Night", "Home Again"]
