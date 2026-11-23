@@ -121,10 +121,10 @@ for world in night_rain fireflies ocean cosmos dream embers minimal; do
     # The first time Now Playing opens it offers Reactive artwork: turn it on,
     # so the cover moves with the beat as well as the world around it.
     shot 02-reactive-hint
-    tap "Turn it on" || tap "Not now" || echo "no Reactive artwork card found"
-    sleep 2
     first=0
   fi
+  # Every time, in case the first tap missed: nothing matches once it is gone.
+  tap "Turn it on" && sleep 2
   sleep 5
   shot "world-$world-a"
   sleep 0.7
