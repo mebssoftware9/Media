@@ -76,8 +76,12 @@ import kotlin.math.abs
 class HeroSlide(
     val key: String,
     val overline: Int,
-    val title: String,
-    val subtitle: String,
+    /** Raw names, made readable when drawn (shownAlbum / shownTitle / shownArtist). */
+    val rawTitle: String,
+    val isAlbum: Boolean,
+    val rawArtist: String,
+    /** Tracks in it; more than one adds "· 12 songs". */
+    val count: Int,
     val art: AppMediaItem,
     /** 0..1 for something half-heard, else null. */
     val progress: Float?,
@@ -231,12 +235,14 @@ private fun HeroCard(s: HeroSlide, modifier: Modifier = Modifier) {
                 )
                 Spacer(Modifier.height(Space.sm))
                 Text(
-                    s.title,
+                    if (s.isAlbum) shownAlbum(s.rawTitle) else shownTitle(s.rawTitle),
                     style = Typo.Display.copy(fontWeight = FontWeight.ExtraBold, fontSize = 26.sp, lineHeight = 29.sp),
                     color = Color.White, maxLines = 2, overflow = TextOverflow.Ellipsis
                 )
                 Spacer(Modifier.height(Space.xs))
-                Text(s.subtitle, style = Typo.Secondary, color = Color.White.copy(alpha = 0.72f),
+                val who = shownArtist(s.rawArtist)
+                Text(if (s.count > 1) who + "  \u00b7  " + plural(R.plurals.count_tracks, s.count) else who,
+                    style = Typo.Secondary, color = Color.White.copy(alpha = 0.72f),
                     maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             Column {
@@ -300,13 +306,14 @@ private val CardH = 132.dp
 private fun GlassCard(item: AppMediaItem, playing: Boolean, onClick: () -> Unit) {
     val cyan = MediaColors.Accent
     val shape = RoundedCornerShape(18.dp)
+    val desc = shownTitle(item.title)
     Box(
         Modifier.size(CardW, CardH)
             .then(if (playing) Modifier.shadow(16.dp, shape, spotColor = cyan, ambientColor = cyan) else Modifier)
             .clip(shape)
             .border(1.dp, if (playing) cyan.copy(alpha = 0.9f) else Color.White.copy(alpha = 0.14f), shape)
             .pressScale(haptic = true, onClick = onClick)
-            .semantics { contentDescription = shownTitle(item.title) }
+            .semantics { contentDescription = desc }
     ) {
         CoverArt(item, Modifier.fillMaxSize(), corner = 0, targetPx = 360)
         Box(Modifier.matchParentSize().background(Brush.verticalGradient(
@@ -382,7 +389,6 @@ fun heroSlidesFor(
     resume: Pair<AppMediaItem, PlaybackPosition>?,
     lastPlayed: Map<Long, Long>,
     playCounts: Map<Long, Int>,
-    subtitleFor: (List<AppMediaItem>) -> String,
     play: (List<AppMediaItem>, Int) -> Unit,
     playAt: (AppMediaItem, Long) -> Unit
 ): List<HeroSlide> {
@@ -391,7 +397,7 @@ fun heroSlidesFor(
     resume?.let { (item, pos) ->
         out += HeroSlide(
             key = "resume", overline = R.string.hero_continue,
-            title = shownTitle(item.title), subtitle = shownArtist(item.artist), art = item,
+            rawTitle = item.title, isAlbum = false, rawArtist = item.artist, count = 1, art = item,
             progress = (pos.positionMs.toFloat() / pos.durationMs).coerceIn(0f, 1f),
             onPlay = { playAt(item, pos.positionMs) }
         )
@@ -400,8 +406,8 @@ fun heroSlidesFor(
     val groups: List<List<AppMediaItem>> = if (pillar == Pillar.MUSIC) {
         MediaRepository.albumsOf(inPillar).filter { it.tracks.isNotEmpty() }.map { it.tracks }
     } else inPillar.map { listOf(it) }
-    fun titleOf(g: List<AppMediaItem>) =
-        if (pillar == Pillar.MUSIC && g.first().album.isNotBlank()) shownAlbum(g.first().album) else shownTitle(g.first().title)
+    fun albumOf(g: List<AppMediaItem>) = pillar == Pillar.MUSIC && g.first().album.isNotBlank()
+    fun titleOf(g: List<AppMediaItem>) = if (albumOf(g)) g.first().album else g.first().title
     val used = HashSet<Long>()
     resume?.first?.let { used += it.id }
     val top = groups.filter { g -> g.sumOf { playCounts[it.id] ?: 0 } > 0 }
@@ -410,7 +416,8 @@ fun heroSlidesFor(
         used += top.map { it.id }
         out += HeroSlide(
             key = "top", overline = R.string.hero_most_played,
-            title = titleOf(top), subtitle = subtitleFor(top), art = top.first(), progress = null,
+            rawTitle = titleOf(top), isAlbum = albumOf(top), rawArtist = top.first().artist, count = top.size,
+            art = top.first(), progress = null,
             onPlay = { play(top, 0) }
         )
     }
@@ -423,7 +430,8 @@ fun heroSlidesFor(
         val g = quiet[Math.floorMod(day, quiet.size)]
         out += HeroSlide(
             key = "rediscover", overline = if (out.isEmpty()) R.string.hero_journey else R.string.hero_rediscover,
-            title = titleOf(g), subtitle = subtitleFor(g), art = g.first(), progress = null,
+            rawTitle = titleOf(g), isAlbum = albumOf(g), rawArtist = g.first().artist, count = g.size,
+            art = g.first(), progress = null,
             onPlay = { play(g, 0) }
         )
     }

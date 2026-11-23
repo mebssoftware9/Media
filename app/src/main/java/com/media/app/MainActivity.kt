@@ -1057,17 +1057,12 @@ private fun HomeFormatPage(
             .sortedByDescending { lib.lastPlayed[it.id] }
             .take(12)
     }
-    val context = LocalContext.current
     // One editorial feature at a time (HomeHero.kt): continue, most played,
     // rediscover. The resume card is the first of them.
     val slides = remember(inPillar, resume, lib.lastPlayed, lib.playCounts) {
         heroSlidesFor(
             pillar = pillar, inPillar = inPillar, resume = resume,
             lastPlayed = lib.lastPlayed, playCounts = lib.playCounts,
-            subtitleFor = { g ->
-                val who = shownArtist(g.first().artist)
-                if (g.size > 1) who + "  \u00b7  " + context.plural(R.plurals.count_tracks, g.size) else who
-            },
             play = { list, i ->
                 vm.play(list, i)
                 if (list[i].type == MediaType.VIDEO) nav.showPlayer = true
