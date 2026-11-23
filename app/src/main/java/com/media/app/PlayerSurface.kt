@@ -406,9 +406,7 @@ fun PlayerSurface(
                     onFullscreen = onFullscreen,
                     onToggleLyrics = { showLyrics = !showLyrics },
                     onOpenSound = onOpenSound,
-                    onOpenQueue = { showQueue = true },
-                    artMode = artMode,
-                    onCycleArt = { artScope.launch { SettingsStore.cycleArtwork(artCtx) } }
+                    onOpenQueue = { showQueue = true }
                 )
 
                 // Text over a coloured backdrop gets a soft shadow so it holds
@@ -446,7 +444,9 @@ fun PlayerSurface(
                     onOpenSleep = { showSleepSheet = true },
                     onOpenSpeed = { showSpeedSheet = true },
                     chapters = chapters,
-                    onOpenMarks = { showMarks = true }
+                    onOpenMarks = { showMarks = true },
+                    artMode = artMode,
+                    onCycleArt = { artScope.launch { SettingsStore.cycleArtwork(artCtx) } }
                 )
             }
         }
@@ -1063,9 +1063,7 @@ private fun NowPlayingTopBar(
     onFullscreen: () -> Unit,
     onToggleLyrics: () -> Unit,
     onOpenSound: () -> Unit,
-    onOpenQueue: () -> Unit,
-    artMode: Int,
-    onCycleArt: () -> Unit
+    onOpenQueue: () -> Unit
 ) {
     Row(
         Modifier.fillMaxWidth().statusBarsPadding()
@@ -1105,27 +1103,6 @@ private fun NowPlayingTopBar(
         // Video has no favourites concept here and the row is
         // already carrying fullscreen + PiP.
         if (!state.isVideo) {
-            // The artwork: still, moving with the music, or gone so the
-            // world fills the screen. Lit while it is anything but still.
-            Icon(
-                when (artMode) {
-                    3 -> Icons.Filled.Landscape
-                    2 -> Icons.Filled.Speaker
-                    1 -> Icons.Filled.AutoAwesome
-                    else -> Icons.Outlined.Image
-                },
-                stringResource(
-                    when (artMode) {
-                        3 -> R.string.art_mode_hidden
-                        2 -> R.string.art_mode_speaker
-                        1 -> R.string.art_mode_reactive
-                        else -> R.string.art_mode_still
-                    }
-                ),
-                tint = if (artMode != 0) MediaColors.Accent else MediaColors.Cream,
-                modifier = Modifier.size(24.dp).pressScale(haptic = true, onClick = onCycleArt)
-            )
-            Spacer(Modifier.width(Space.md))
             Icon(
                 Icons.Filled.Lyrics, stringResource(if (showLyrics) R.string.action_hide_lyrics else R.string.action_lyrics),
                 tint = if (showLyrics) MediaColors.Accent else MediaColors.Cream,
@@ -1171,7 +1148,9 @@ private fun BoxScope.NowPlayingControls(
     onOpenSleep: () -> Unit,
     onOpenSpeed: () -> Unit,
     chapters: List<Chapter>,
-    onOpenMarks: () -> Unit
+    onOpenMarks: () -> Unit,
+    artMode: Int,
+    onCycleArt: () -> Unit
 ) {
     Column(
         // Measured BEFORE the nav-bar padding. Measured after it,
@@ -1203,7 +1182,8 @@ private fun BoxScope.NowPlayingControls(
         NowPlayingTitle(
             state = state, showLyrics = showLyrics, titleShadow = titleShadow, source = source,
             isFavorite = isFavorite, onToggleFavorite = onToggleFavorite,
-            onOpenAudioPath = onOpenAudioPath
+            onOpenAudioPath = onOpenAudioPath,
+            artMode = artMode, onCycleArt = onCycleArt
         )
 
         if (state.durationMs > 0) {
@@ -1238,6 +1218,28 @@ private fun BoxScope.NowPlayingControls(
     }
 }
 
+@Composable
+private fun ArtworkButton(artMode: Int, onCycleArt: () -> Unit, modifier: Modifier) {
+    Icon(
+        when (artMode) {
+            3 -> Icons.Filled.Landscape
+            2 -> Icons.Filled.Speaker
+            1 -> Icons.Filled.AutoAwesome
+            else -> Icons.Outlined.Image
+        },
+        stringResource(
+            when (artMode) {
+                3 -> R.string.art_mode_hidden
+                2 -> R.string.art_mode_speaker
+                1 -> R.string.art_mode_reactive
+                else -> R.string.art_mode_still
+            }
+        ),
+        tint = if (artMode != 0) MediaColors.Accent else MediaColors.CreamDim,
+        modifier = modifier.pressScale(haptic = true, onClick = onCycleArt)
+    )
+}
+
 /** Title, artist, the heart, and the source badge. */
 @Composable
 private fun NowPlayingTitle(
@@ -1247,7 +1249,9 @@ private fun NowPlayingTitle(
     source: SourceFormat?,
     isFavorite: Boolean,
     onToggleFavorite: () -> Unit,
-    onOpenAudioPath: () -> Unit
+    onOpenAudioPath: () -> Unit,
+    artMode: Int,
+    onCycleArt: () -> Unit
 ) {
     Column(Modifier.fillMaxWidth().padding(Space.xl, 0.dp, Space.xl, Space.md)) {
         // Heart beside the title, under the art: where the
@@ -1263,6 +1267,10 @@ private fun NowPlayingTitle(
             // and a heart beside them is clutter.
             if (!state.isVideo && !showLyrics) {
                 Spacer(Modifier.width(Space.md))
+                // The artwork button, beside the heart: still cover ->
+                // reactive -> speaker -> hidden. Lit while not still.
+                ArtworkButton(artMode, onCycleArt, Modifier.size(28.dp))
+                Spacer(Modifier.width(Space.lg))
                 FavoriteButton(isFavorite, Modifier.size(28.dp), onToggleFavorite)
             }
         }

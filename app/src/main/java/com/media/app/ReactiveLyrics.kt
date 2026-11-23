@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 // ============================================================================
@@ -106,11 +107,14 @@ fun SungLine(
     }
     val cream = MediaColors.Cream
     val base = Typo.Section
+    // Centred: the line rises in from below and opens out from the middle
+    // to its full width, and the next line waits, centred, beneath it.
     Column(
         modifier.clickable(
             interactionSource = remember { MutableInteractionSource() },
             indication = null, onClick = onClick
-        )
+        ),
+        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
     ) {
         Text(
             now,
@@ -120,14 +124,18 @@ fun SungLine(
                 shadow = Shadow(accent.copy(alpha = 0.55f + 0.35f * rise.value), blurRadius = 22f + 30f * rise.value)
             ),
             maxLines = 2, overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth().graphicsLayer {
                 // The kick, read here in the draw pass: no recomposition.
                 val k = beat?.push ?: 0f
-                val s = 1f + 0.035f * k
-                scaleX = s; scaleY = s
-                transformOrigin = TransformOrigin(0f, 0.5f)
-                translationY = 18.dp.toPx() * rise.value
-                alpha = 1f - 0.6f * rise.value
+                val r = rise.value
+                // Up from below, and in from the sides: it starts narrow at
+                // the centre and opens out to its full width.
+                scaleX = (1f + 0.035f * k) * (1f - 0.22f * r)
+                scaleY = (1f + 0.035f * k) * (1f - 0.08f * r)
+                transformOrigin = TransformOrigin(0.5f, 1f)
+                translationY = 26.dp.toPx() * r
+                alpha = 1f - 0.85f * r
             }
         )
         if (next.isNotBlank()) {
@@ -136,6 +144,7 @@ fun SungLine(
                 style = Typo.Body,
                 color = MediaColors.CreamFaint,
                 maxLines = 1, overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
                     .graphicsLayer { alpha = 0.75f - 0.5f * rise.value }
             )
