@@ -425,7 +425,8 @@
     <string name="search_recent">Recherches récentes</string>
     <string name="search_recent_remove">Retirer des recherches récentes</string>
     <string name="art_mode_still">Pochette : fixe. Touchez pour qu\'elle bouge avec la musique</string>
-    <string name="art_mode_reactive">La pochette bouge avec la musique. Touchez pour la masquer</string>
+    <string name="art_mode_reactive">La pochette bouge avec la musique. Touchez pour le haut-parleur</string>
+    <string name="art_mode_speaker">Haut-parleur : la pochette sur une membrane qui bat avec le rythme. Touchez pour la masquer</string>
     <string name="art_mode_hidden">Pochette masquée, le monde remplit l\'écran. Touchez pour la remettre</string>
     <string name="search_empty_hint">Trouvez n\'importe quoi dans votre bibliothèque</string>
     <string name="search_no_matches_title">Aucun résultat dans votre bibliothèque</string>

@@ -425,7 +425,8 @@
     <string name="search_recent">Pesquisas recentes</string>
     <string name="search_recent_remove">Remover das pesquisas recentes</string>
     <string name="art_mode_still">Capa: parada. Toque para ela se mover com a música</string>
-    <string name="art_mode_reactive">A capa se move com a música. Toque para ocultá-la</string>
+    <string name="art_mode_reactive">A capa se move com a música. Toque para o alto-falante</string>
+    <string name="art_mode_speaker">Alto-falante: a capa num cone que se move com a batida. Toque para ocultá-la</string>
     <string name="art_mode_hidden">Capa oculta, o mundo preenche a tela. Toque para trazê-la de volta</string>
     <string name="search_empty_hint">Encontre qualquer coisa na sua biblioteca</string>
     <string name="search_no_matches_title">Nenhum resultado na sua biblioteca</string>

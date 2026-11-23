@@ -410,7 +410,8 @@
     <string name="search_recent">Pencarian terbaru</string>
     <string name="search_recent_remove">Hapus dari pencarian terbaru</string>
     <string name="art_mode_still">Sampul: diam. Ketuk agar bergerak mengikuti musik</string>
-    <string name="art_mode_reactive">Sampul bergerak mengikuti musik. Ketuk untuk menyembunyikan</string>
+    <string name="art_mode_reactive">Sampul bergerak mengikuti musik. Ketuk untuk speaker</string>
+    <string name="art_mode_speaker">Speaker: sampul di atas driver yang bergerak mengikuti ketukan. Ketuk untuk menyembunyikan</string>
     <string name="art_mode_hidden">Sampul disembunyikan, dunia memenuhi layar. Ketuk untuk menampilkannya lagi</string>
     <string name="search_empty_hint">Temukan apa saja di koleksimu</string>
     <string name="search_no_matches_title">Tidak ada yang cocok di koleksimu</string>

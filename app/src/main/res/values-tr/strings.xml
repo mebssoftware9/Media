@@ -425,7 +425,8 @@
     <string name="search_recent">Son aramalar</string>
     <string name="search_recent_remove">Son aramalardan kaldır</string>
     <string name="art_mode_still">Kapak: sabit. Müzikle hareket etmesi için dokunun</string>
-    <string name="art_mode_reactive">Kapak müzikle hareket ediyor. Gizlemek için dokunun</string>
+    <string name="art_mode_reactive">Kapak müzikle hareket ediyor. Hoparlör için dokunun</string>
+    <string name="art_mode_speaker">Hoparlör: kapak, ritimle hareket eden bir sürücünün üstünde. Gizlemek için dokunun</string>
     <string name="art_mode_hidden">Kapak gizli, dünya ekranı dolduruyor. Geri getirmek için dokunun</string>
     <string name="search_empty_hint">Kitaplığında her şeyi bul</string>
     <string name="search_no_matches_title">Kitaplığında eşleşme yok</string>

@@ -30,6 +30,7 @@ object SettingsStore {
     private val PLAYER_HINT = booleanPreferencesKey("player_hint_seen")
     private val REACTIVE_ART = booleanPreferencesKey("reactive_artwork")
     private val HIDE_COVER = booleanPreferencesKey("hide_cover")
+    private val SPEAKER = booleanPreferencesKey("speaker_art")
     private val QUALITY = stringPreferencesKey("display_quality")
     private val WORLD = stringPreferencesKey("living_world")
     private val AVATAR = longPreferencesKey("avatar_stamp")
@@ -111,14 +112,24 @@ object SettingsStore {
     fun hideCoverFlow(context: Context): Flow<Boolean> =
         context.dataStore.data.map { it[HIDE_COVER] ?: false }
 
-    /** The artwork button: still cover -> reactive cover -> no cover -> still cover. */
+    // The artwork button's speaker state (SpeakerArt.kt).
+    fun speakerFlow(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { it[SPEAKER] ?: false }
+
+    /**
+     * The artwork button: still cover -> reactive cover -> speaker -> no
+     * cover -> still cover. The speaker keeps Reactive artwork on, since it
+     * moves with the same beat.
+     */
     suspend fun cycleArtwork(context: Context) {
         context.dataStore.edit {
             val reactive = it[REACTIVE_ART] ?: false
+            val speaker = it[SPEAKER] ?: false
             val hidden = it[HIDE_COVER] ?: false
             when {
-                hidden -> { it[HIDE_COVER] = false; it[REACTIVE_ART] = false }
-                reactive -> it[HIDE_COVER] = true
+                hidden -> { it[HIDE_COVER] = false; it[SPEAKER] = false; it[REACTIVE_ART] = false }
+                speaker -> { it[SPEAKER] = false; it[HIDE_COVER] = true }
+                reactive -> it[SPEAKER] = true
                 else -> it[REACTIVE_ART] = true
             }
         }

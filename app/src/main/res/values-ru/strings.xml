@@ -455,7 +455,8 @@
     <string name="search_recent">Недавние запросы</string>
     <string name="search_recent_remove">Удалить из недавних запросов</string>
     <string name="art_mode_still">Обложка неподвижна. Нажмите, чтобы она двигалась под музыку</string>
-    <string name="art_mode_reactive">Обложка движется под музыку. Нажмите, чтобы скрыть</string>
+    <string name="art_mode_reactive">Обложка движется под музыку. Нажмите для динамика</string>
+    <string name="art_mode_speaker">Динамик: обложка на диффузоре, который движется в такт. Нажмите, чтобы скрыть</string>
     <string name="art_mode_hidden">Обложка скрыта, мир заполняет экран. Нажмите, чтобы вернуть</string>
     <string name="search_empty_hint">Найдите что угодно в своей медиатеке</string>
     <string name="search_no_matches_title">В медиатеке ничего не найдено</string>

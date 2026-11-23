@@ -425,7 +425,8 @@
     <string name="search_recent">हाल की खोजें</string>
     <string name="search_recent_remove">हाल की खोजों से हटाएँ</string>
     <string name="art_mode_still">आर्टवर्क: स्थिर। संगीत के साथ हिलाने के लिए टैप करें</string>
-    <string name="art_mode_reactive">आर्टवर्क संगीत के साथ हिलता है। छिपाने के लिए टैप करें</string>
+    <string name="art_mode_reactive">आर्टवर्क संगीत के साथ हिलता है। स्पीकर के लिए टैप करें</string>
+    <string name="art_mode_speaker">स्पीकर: कवर एक ड्राइवर पर जो बीट के साथ चलता है। छिपाने के लिए टैप करें</string>
     <string name="art_mode_hidden">आर्टवर्क छिपा है, दुनिया पूरी स्क्रीन पर है। वापस लाने के लिए टैप करें</string>
     <string name="search_empty_hint">अपनी लाइब्रेरी में कुछ भी ढूँढें</string>
     <string name="search_no_matches_title">आपकी लाइब्रेरी में कोई मेल नहीं</string>

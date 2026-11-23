@@ -410,7 +410,8 @@
     <string name="search_recent">最近の検索</string>
     <string name="search_recent_remove">最近の検索から削除</string>
     <string name="art_mode_still">アートワーク：静止。タップで音楽に合わせて動きます</string>
-    <string name="art_mode_reactive">アートワークが音楽に合わせて動きます。タップで非表示</string>
+    <string name="art_mode_reactive">アートワークが音楽に合わせて動きます。タップでスピーカー</string>
+    <string name="art_mode_speaker">スピーカー：ビートに合わせて動くドライバーにカバーを。タップで非表示</string>
     <string name="art_mode_hidden">アートワーク非表示：ワールドが画面いっぱいに。タップで戻します</string>
     <string name="search_empty_hint">ライブラリから何でも探せます</string>
     <string name="search_no_matches_title">ライブラリに一致するものはありません</string>

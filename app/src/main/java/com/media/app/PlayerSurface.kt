@@ -40,6 +40,7 @@ import androidx.compose.material.icons.outlined.Bookmarks
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.filled.Landscape
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Speaker
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -150,10 +151,15 @@ fun PlayerSurface(
     val artScope = rememberCoroutineScope()
     val reactiveArt by remember(artCtx) { SettingsStore.reactiveArtFlow(artCtx) }.collectAsState(initial = false)
     val hideCover by remember(artCtx) { SettingsStore.hideCoverFlow(artCtx) }.collectAsState(initial = false)
+    val speakerOn by remember(artCtx) { SettingsStore.speakerFlow(artCtx) }.collectAsState(initial = false)
+    // The speaker (SpeakerArt.kt): the cover on the dust cap of a driver
+    // that moves like a real one. Music only.
+    val speaker = speakerOn && !hideCover && !state.isVideo
+    val speakerAmt by animateFloatAsState(if (speaker) 1f else 0f, tween(600), label = "speaker")
     val coverGone by animateFloatAsState(
-        if (hideCover && !state.isVideo) 1f else 0f, tween(700), label = "coverGone"
+        if ((hideCover || speaker) && !state.isVideo) 1f else 0f, tween(700), label = "coverGone"
     )
-    val artMode = when { hideCover -> 2; reactiveArt -> 1; else -> 0 }
+    val artMode = when { hideCover -> 3; speaker -> 2; reactiveArt -> 1; else -> 0 }
     val chapters = rememberChapters(state.currentUri, state.longForm && !state.isVideo)
     // Lyrics take the artwork's place rather than opening a new screen: the
     // words belong with the music, and the transport stays under the thumb.
@@ -357,7 +363,8 @@ fun PlayerSurface(
                 e = e, q = q, isVideo = state.isVideo, expanded = expanded,
                 backdropItem = libraryItem ?: artItem, artColors = artColors,
                 beat = beat, tilt = tilt, ambient = ambient, glow = glow, heightPx = heightPx,
-                artX = artX, artY = artY, artW = artW, artH = artH, world = world
+                artX = artX, artY = artY, artW = artW, artH = artH, world = world,
+                speaker = speaker
             )
 
             PlayerArtwork(
@@ -367,6 +374,24 @@ fun PlayerSurface(
                 artItem = artItem, reduced = reduced, videoSurface = videoSurface, vm = vm,
                 coverGone = coverGone
             )
+            // The speaker, in the cover's place, fading in as the flat cover
+            // fades out. Only once Now Playing is the hero.
+            if (speakerAmt > 0.01f && !state.isVideo && e > 0.5f) {
+                val k = ((e - 0.5f) * 2f).coerceIn(0f, 1f)
+                val sideDp = minOf(artW, artH)
+                Box(
+                    Modifier.offset(x = artX + (artW - sideDp) / 2f, y = artY + (artH - sideDp) / 2f)
+                        .size(sideDp)
+                        .graphicsLayer { alpha = speakerAmt * k }
+                ) {
+                    SpeakerDriver(
+                        item = artItem, beat = beat,
+                        running = state.isPlaying && expanded && !reduced,
+                        strength = (0.45f + 0.15f * q.reactiveLevel).coerceIn(0.5f, 1f),
+                        side = sideDp
+                    )
+                }
+            }
 
             // ---------------- collapsed chrome ----------------
             if (miniAlpha > 0.01f) {
@@ -623,7 +648,10 @@ private fun BoxScope.PlayerLight(
     artY: androidx.compose.ui.unit.Dp,
     artW: androidx.compose.ui.unit.Dp,
     artH: androidx.compose.ui.unit.Dp,
-    world: WorldFeed?
+    world: WorldFeed?,
+    // The speaker is showing: the driver does the moving, so the rings
+    // and the light behind the cover stay off.
+    speaker: Boolean = false
 ) {
     val density = LocalDensity.current
     val ink = MediaColors.Ink
@@ -689,7 +717,7 @@ private fun BoxScope.PlayerLight(
     // behind it rather than a ring stuck on top.
     // Shockwave rings ride outside the bloom and are always mounted
     // while expanded — they animate off their own birth timestamps.
-    if (e > 0.5f && q.reactiveLevel >= 2) {
+    if (e > 0.5f && q.reactiveLevel >= 2 && !speaker) {
         // Full-size layer, centre computed from the artwork rather than
         // from the Canvas. The old version sized its box to ~1.5x the
         // screen and offset it negative, so Compose clamped it and the
@@ -709,7 +737,7 @@ private fun BoxScope.PlayerLight(
     // Every tier lights the cover from behind: one texture draw a frame is
     // cheap, and it is what makes the cover feel lit rather than merely
     // bouncing.
-    if (e > 0.35f && q.reactiveLevel >= 1 && !isVideo) {
+    if (e > 0.35f && q.reactiveLevel >= 1 && !isVideo && !speaker) {
         // A Canvas, not a Box with a conditional background: `if
         // (level > 0.01f)` was a COMPOSITION-level branch on a value
         // that changes 60x/second, so this mounted and unmounted every
@@ -1081,13 +1109,15 @@ private fun NowPlayingTopBar(
             // world fills the screen. Lit while it is anything but still.
             Icon(
                 when (artMode) {
-                    2 -> Icons.Filled.Landscape
+                    3 -> Icons.Filled.Landscape
+                    2 -> Icons.Filled.Speaker
                     1 -> Icons.Filled.AutoAwesome
                     else -> Icons.Outlined.Image
                 },
                 stringResource(
                     when (artMode) {
-                        2 -> R.string.art_mode_hidden
+                        3 -> R.string.art_mode_hidden
+                        2 -> R.string.art_mode_speaker
                         1 -> R.string.art_mode_reactive
                         else -> R.string.art_mode_still
                     }

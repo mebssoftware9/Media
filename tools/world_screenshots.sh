@@ -143,6 +143,9 @@ adb shell am start -a android.intent.action.VIEW \
 sleep 9
 shot 40-sung-line
 burst sung-line
+tap "Tap for the speaker" && sleep 3
+shot 41a-speaker
+burst speaker
 tap "Tap to hide it" && sleep 3
 shot 41-immersive
 burst immersive

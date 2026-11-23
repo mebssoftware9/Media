@@ -410,7 +410,8 @@
     <string name="search_recent">Tìm kiếm gần đây</string>
     <string name="search_recent_remove">Xoá khỏi tìm kiếm gần đây</string>
     <string name="art_mode_still">Ảnh bìa: tĩnh. Chạm để ảnh chuyển động theo nhạc</string>
-    <string name="art_mode_reactive">Ảnh bìa chuyển động theo nhạc. Chạm để ẩn</string>
+    <string name="art_mode_reactive">Ảnh bìa chuyển động theo nhạc. Chạm để xem loa</string>
+    <string name="art_mode_speaker">Loa: ảnh bìa trên màng loa chuyển động theo nhịp. Chạm để ẩn</string>
     <string name="art_mode_hidden">Đã ẩn ảnh bìa, thế giới phủ kín màn hình. Chạm để hiện lại</string>
     <string name="search_empty_hint">Tìm bất cứ thứ gì trong thư viện của bạn</string>
     <string name="search_no_matches_title">Không có kết quả trong thư viện</string>

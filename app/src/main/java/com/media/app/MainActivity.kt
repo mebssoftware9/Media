@@ -737,7 +737,10 @@ fun HomeScaffold(vm: PlayerViewModel) {
     val shape = rememberSoundShape(if (analysable) playingItem else null)
     // The scrubber's waveform: the bass curve it has always drawn.
     val envelope = shape?.wave
-    val reactive = reactiveArtOn && analysable
+    // The speaker (SpeakerArt.kt) moves with the same beat, so it keeps the
+    // pulse running even if Reactive artwork was switched off in Settings.
+    val speakerArtOn by remember(context) { SettingsStore.speakerFlow(context) }.collectAsState(initial = false)
+    val reactive = (reactiveArtOn || speakerArtOn) && analysable
     // Volume is the power control: silent means completely still, and turning
     // it up brings both the movement and the hit count with it.
     val musicVolume = rememberMusicVolume()
