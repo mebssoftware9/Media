@@ -134,31 +134,15 @@ fun TermsScreen(onClose: () -> Unit) {
         Para(
             "Audio and video access is what lets Via see your library at all. " +
             "Notifications carry the playback controls. Network and Wi-Fi state " +
-            "are used by Via Share to find devices on your local network and " +
-            "by advertising. Via asks for nothing it does not use."
+            "are used by Via Share to find devices on your local network. " +
+            "Via asks for nothing it does not use."
         )
 
-        Heading("Advertising")
+        Heading("No ads, no purchases")
         Para(
-            "The free version shows ads supplied by Google AdMob. Google may " +
-            "use your device's advertising identifier to choose them. In the " +
-            "UK and the EEA you are asked for consent the first time the app " +
-            "runs; if you decline, ads still appear but are not personalised. " +
-            "You can change or withdraw that choice at any time in Settings, " +
-            "Privacy, Ad privacy choices, which in the US states that require " +
-            "it also lets you opt out of the sale or sharing of your data. " +
-            "You can reset or delete the advertising identifier at any time in " +
-            "Android's settings. Google's own privacy terms govern what it " +
-            "collects, and the privacy policy linked in Settings says more."
-        )
-
-        Heading("Removing ads")
-        Para(
-            "Ad-free is a one-time purchase made through Google Play. Google " +
-            "takes the payment and holds the receipt; Via only asks Play " +
-            "whether you own it. Refunds are handled by Google under Play's " +
-            "own policy, not by us, and the purchase is tied to your Google " +
-            "account rather than to this phone."
+            "Via has no advertising and nothing to buy. Every feature is " +
+            "available to everyone, and no advertising or billing software " +
+            "is included in the app."
         )
 
         Heading("Deleting files")

@@ -14,7 +14,7 @@ import java.net.URLEncoder
 // ============================================================================
 //  NETWORK
 //
-//  The only code in the app that talks to anything but the ad SDK, and only
+//  The only code in the app that talks to the internet, and only
 //  for enrichment the listener turned on or asked for. Playback never waits
 //  on it: every caller is a background coroutine, and every failure comes
 //  back as a value rather than an exception.

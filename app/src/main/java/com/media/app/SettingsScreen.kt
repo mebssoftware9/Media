@@ -183,6 +183,7 @@ fun SettingsScreen(
             }
         }
 
+        SectionLabel(stringResource(R.string.settings_privacy))
         SettingRow(Icons.Outlined.Shield, stringResource(R.string.settings_privacy_policy), null) {
             runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(privacyUrl))) }
         }
@@ -688,8 +689,7 @@ private fun SettingRow(
     icon: ImageVector,
     title: String,
     value: String?,
-    // Optional second line. The support row needs to state what you get;
-    // "Support Via" alone doesn't say ads go away.
+    // Optional second line, for a row whose title needs a word more.
     subtitle: String? = null,
     navigates: Boolean = true,
     onClick: () -> Unit

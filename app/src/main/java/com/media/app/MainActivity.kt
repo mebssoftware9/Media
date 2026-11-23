@@ -120,36 +120,7 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         // The day may have turned while Via was away.
         Retention.refresh(this)
-        // Not over the splash while it waits for the app-open ad: Play's
-        // sheet would land on top of the ad. Once the splash lifts - or
-        // after the ad closes, which resumes this activity again.
         InAppUpdate.check(this, updateLauncher)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-    }
-
-    // Everything Via opens on top of itself funnels through these two: the
-    // pickers, Play's purchase, review and update sheets, the browser, the
-    // share sheet, the system's delete dialog, an ad. Coming back from one
-    // of them is the listener finishing a step, not opening the app, so it
-    @Deprecated("Deprecated in ComponentActivity")
-    override fun startActivityForResult(intent: Intent, requestCode: Int, options: Bundle?) {
-        super.startActivityForResult(intent, requestCode, options)
-    }
-
-    @Deprecated("Deprecated in ComponentActivity")
-    override fun startIntentSenderForResult(
-        intent: android.content.IntentSender,
-        requestCode: Int,
-        fillInIntent: Intent?,
-        flagsMask: Int,
-        flagsValues: Int,
-        extraFlags: Int,
-        options: Bundle?
-    ) {
-        super.startIntentSenderForResult(intent, requestCode, fillInIntent, flagsMask, flagsValues, extraFlags, options)
     }
 
     // The language picked in Settings, on Android 12 and below (Language.kt).
@@ -181,8 +152,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val splash = installSplashScreen()
         var keep = true
-        // At least the 850ms the iris needs to open, and on until this
-            // over the splash, never over the app.
+        // The 850ms the iris needs to open.
         splash.setKeepOnScreenCondition { keep }
         window.decorView.postDelayed({ keep = false }, 850)
         // Transparent bars with NO system scrim. Plain enableEdgeToEdge()
@@ -199,7 +169,6 @@ class MainActivity : ComponentActivity() {
             window.isStatusBarContrastEnforced = false
         }
         super.onCreate(savedInstanceState)
-        // Before onStart, so this very launch counts as an app open.
         Enrichment.init(this)
         // Opened from a file ("Open with Via"). Not again on a restore: that
         // file has already been played.
@@ -245,8 +214,6 @@ class MainActivity : ComponentActivity() {
                 ) {
                     Surface(Modifier.fillMaxSize(), color = MediaColors.Ink) {
                         AppRoot()
-                        // On a return to Via, the splash again, over
-                        // everything, until the app-open ad is up.
                     }
                 }
             }
@@ -339,11 +306,6 @@ fun AppRoot(vm: PlayerViewModel = viewModel()) {
     // the sending app's grant on that file is enough, library access or not.
     val opened by OpenWith.pending.collectAsState()
     LaunchedEffect(opened) { opened?.let { vm.playExternal(it) } }
-
-    // The welcome and permission screens are not an app open: a launch
-    // that lands on them lifts the splash at once, with no ad.
-    LaunchedEffect(introSeen, granted) {
-    }
 
     // Local step for the first-run flow: 0 = welcome, 1 = permission explainer.
     var onboardStep by remember { mutableStateOf(0) }
@@ -574,14 +536,6 @@ class HomeNav {
         }
     }
 
-    val place: HomePlace
-        get() = HomePlace(
-            tab = currentTab,
-            detail = openPlaylist?.let { "playlist:${it.id}" }
-                ?: openAlbum?.let { "album:${it.id}" }
-                ?: openArtist?.let { "artist:${it.id}" }
-        )
-
     val anyOverlay: Boolean
         get() = showSound || artworkItem != null || detailsItem != null || showAudioPath ||
             addToItem != null || editItem != null || showTerms || showAbout ||
@@ -617,13 +571,6 @@ class HomeNav {
             showLibrary -> { tabDirection = -1; showLibrary = false; libraryPillar = null; currentTab = 0 }
         }
     }
-}
-
-/** A tab, and the album, artist or playlist open on it, if any. */
-data class HomePlace(val tab: Int, val detail: String?) {
-    /** A different tab, or a detail opened (not closed) on this one. */
-    fun isForwardOf(before: HomePlace): Boolean =
-        tab != before.tab || (detail != null && detail != before.detail)
 }
 
 /**

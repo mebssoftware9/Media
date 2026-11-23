@@ -31,7 +31,7 @@ import java.net.URL
 //  RAW SOCKETS, deliberately. UPnP is plain HTTP on the local network, and
 //  targetSdk 36 blocks cleartext for HttpURLConnection and OkHttp. The usual
 //  workaround is cleartextTrafficPermitted=true, which switches that
-//  protection off for the WHOLE app including the ad SDK. A socket is not
+//  protection off for the WHOLE app. A socket is not
 //  subject to the network security config, so the LAN stays reachable and
 //  everything that leaves this device keeps its TLS requirement.
 // ============================================================================
