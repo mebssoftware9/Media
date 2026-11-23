@@ -41,8 +41,12 @@ import androidx.compose.ui.unit.sp
 //  would read uninitialised file-level properties.
 // ============================================================================
 object Via {
-    val Accent = Color(0xFF2DD4BF)   // active state, progress, selection
-    val Ground = Color(0xFF000000)   // near black — the one flat floor
+    // The blueprint's colour roles (Immersive Experience Blueprint, 12):
+    // signature luminous cyan for what is active, ultraviolet for secondary
+    // highlights and atmosphere, midnight ink as the floor.
+    val Accent = Color(0xFF20E6F2)   // signature: active tab, playback, progress, primary action
+    val Violet = Color(0xFF8B4DFF)   // accent: secondary highlights, artwork atmosphere
+    val Ground = Color(0xFF050816)   // base: midnight ink
 }
 
 enum class Mood(
@@ -114,26 +118,26 @@ val DarkPalette = Palette(
     // Was a purple-navy cast (#17141F and friends). A tinted ground under
     // full-colour album art muddies every warm cover on the screen, so the
     // floor is neutral now and the artwork supplies the colour.
-    bg = Via.Ground,                 // #000000 — pixels off on OLED
-    surface = Color(0xFF0B0B0D),     // +1 step
-    elevated = Color(0xFF15151A),    // +2 - cards, panels
-    floating = Color(0xFF1F1F26),    // +3 - reads above scrolling content
+    bg = Via.Ground,                 // #050816 midnight ink
+    surface = Color(0xFF0A1020),     // +1 step
+    elevated = Color(0xFF10172B),    // +2 - cards, panels (the blueprint's deep slate)
+    floating = Color(0xFF182139),    // +3 - reads above scrolling content
     // Was 0xFF292930. On a pure black floor that is a grey slab, and it read
     // as a leftover from the old grey design every time a sheet came up. A
     // sheet does not need to out-lighten the page to look raised: it sits on
     // a 0xCC scrim that has already taken the page to near-black, and it has
     // a Fill border and rounded top corners. Those do the separating -
     // lightness was only making it grey.
-    modal = Color(0xFF1A1A21),       // +4 - sheets sit highest
-    hairline = Color(0xFF33333B),    // neutral rule
+    modal = Color(0xFF141C33),       // +4 - sheets sit highest
+    hairline = Color(0xFF283252),    // cool rule
     text = Color(0xFFF2F3F5),
     textDim = Color(0xFFA8AEBA),
     // 5.8:1 on `elevated`, the worst surface it lands on. The deeper floor
     // bought contrast back rather than spending it.
     textFaint = Color(0xFF8B929E),
     accent = Via.Accent,             // the ONLY accent in the app
-    onAccent = Color(0xFF06231F),
-    onInverse = Via.Ground           // was a leftover purple
+    onAccent = Color(0xFF02232A),
+    onInverse = Via.Ground
 )
 
 // Light kept as a graceful fallback (screenshots are dark-first).
@@ -148,7 +152,7 @@ val LightPalette = Palette(
     text = Color(0xFF16161C),
     textDim = Color(0xFF5C5C68),
     textFaint = Color(0xFF9A9AA8),
-    accent = Color(0xFF17B3A0),
+    accent = Color(0xFF0AA6B4),
     onAccent = Color(0xFFFFFFFF),
     onInverse = Color(0xFFFFFFFF)
 )

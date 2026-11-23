@@ -49,7 +49,7 @@ import androidx.compose.ui.semantics.semantics
 object ArtworkTokens {
     val Top = Color(0xFF2C3140)
     val Bottom = Color(0xFF171A22)
-    val Glow = Color(0xFF2DD4BF)
+    val Glow = Color(0xFF20E6F2)
     val MarkTop = Color(0xFFFFFFFF)
     val MarkBottom = Color(0xFFBFEEE6)
     const val GlowAlpha = 0.20f
