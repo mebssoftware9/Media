@@ -358,13 +358,15 @@ class WorldFrame {
     val coverBottom: Float get() = coverCy + coverSize / 2f
 
     /**
-     * Full strength above the words; down to [VEIL_FLOOR] over a fifth of
-     * the screen below where they start, so the title and controls always
-     * read.
+     * Full strength around the cover; down to [VEIL_FLOOR] by the time the
+     * title is under way, so the title and controls always read. The fade
+     * starts a little ABOVE where the words start: starting at the words
+     * left the title line itself under the world at full strength.
      */
     fun veil(y: Float): Float {
-        if (y <= textTop) return 1f
-        val t = ((y - textTop) / (h * 0.20f)).coerceIn(0f, 1f)
+        val start = textTop - h * 0.03f
+        if (y <= start) return 1f
+        val t = ((y - start) / (h * 0.09f)).coerceIn(0f, 1f)
         return 1f - t * (1f - VEIL_FLOOR)
     }
 
@@ -859,7 +861,7 @@ private class Dream(seed: Long, budget: Float) : WorldScene(WorldKind.DREAM, see
 // -------------------------------------------------------------- embers --
 
 private class Embers(seed: Long, budget: Float) : WorldScene(WorldKind.EMBERS, seed, budget) {
-    private val n = count(100)
+    private val n = count(140)
     private val x = FloatArray(n) { r01() }
     private val y = FloatArray(n) { rIn(0.1f, 1.05f) }
     private val vy = FloatArray(n) { rIn(0.06f, 0.20f) }
@@ -894,18 +896,18 @@ private class Embers(seed: Long, budget: Float) : WorldScene(WorldKind.EMBERS, s
         val d = f.density
         val t = time
         // The heat below.
-        p.glow(f.coverCx, h * 1.02f, w * 0.95f, pal.second, 0.30f + 0.25f * s.bass)
+        p.glow(f.coverCx, h * 1.02f, w * 0.95f, pal.second, 0.38f + 0.27f * s.bass)
         p.glow(f.coverCx, f.coverBottom, f.coverSize * 0.9f, pal.main, 0.12f + 0.16f * s.bass)
         for (i in 0 until n) {
             val l = life[i]
             val px = x[i] * w + f.tiltX * 10f * d
             val py = y[i] * h
             val flicker = 0.6f + 0.4f * sin(t * 9f + ph[i])
-            val a = (1f - l).pow(1.2f) * flicker * (0.55f + 0.45f * lift) * f.veil(py)
+            val a = (1f - l).pow(1.2f) * flicker * (0.72f + 0.28f * lift) * f.veil(py)
             if (a < 0.01f) continue
             val r = size[i] * d * (1f - 0.5f * l)
             val col = if (l < 0.5f) pal.main else pal.second
-            p.glow(px, py, r * 5.5f, col, a * 0.55f)
+            p.glow(px, py, r * 6.5f, col, a * 0.75f)
             p.dot(px, py, r, pal.bright, min(1f, a * 1.1f))
         }
     }
@@ -938,7 +940,9 @@ private class Minimal(seed: Long, budget: Float) : WorldScene(WorldKind.MINIMAL,
         val h = f.h
         val d = f.density
         val t = time
-        val hy = f.coverBottom + h * 0.04f
+        // Behind the cover's lower edge: the cover hides its middle, the
+        // sides show beside it, well clear of the title below.
+        val hy = f.coverBottom - f.coverSize * 0.14f
         val deep = h - hy
         // The horizon line, lit by the snare.
         p.line(0f, hy, w, hy, 1.2f * d, pal.main, (0.40f + 0.45f * s.snare) * f.veil(hy))
