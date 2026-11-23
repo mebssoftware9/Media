@@ -326,12 +326,24 @@ fun PlayerSurface(
                 .then(
                     if (darkTheme && glass > 0f) Modifier
                         .background(
+                            Brush.horizontalGradient(
+                                listOf(Via.Violet.copy(alpha = 0.16f * glass), Via.Accent.copy(alpha = 0.07f * glass))
+                            )
+                        )
+                        .background(
                             Brush.verticalGradient(
-                                listOf(Color.White.copy(alpha = 0.05f * glass), Color.Transparent),
+                                listOf(Color.White.copy(alpha = 0.06f * glass), Color.Transparent),
                                 endY = pillPx * 0.9f
                             )
                         )
-                        .border(0.5.dp, Color.White.copy(alpha = 0.10f * glass), RoundedCornerShape(corner))
+                        // The blueprint's glass: a cyan-to-violet edge of light.
+                        .border(
+                            1.dp,
+                            Brush.horizontalGradient(
+                                listOf(Via.Accent.copy(alpha = 0.55f * glass), Via.Violet.copy(alpha = 0.55f * glass))
+                            ),
+                            RoundedCornerShape(corner)
+                        )
                     else Modifier
                 )
                 .then(
@@ -941,8 +953,12 @@ private fun BoxScope.MiniChrome(
         Column(Modifier.weight(1f)) {
             Text(shownTitle(state.currentTitle), style = Typo.Primary, color = MediaColors.Cream,
                 maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(shownArtist(state.currentArtist), style = Typo.Secondary, color = MediaColors.CreamDim,
-                maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(shownArtist(state.currentArtist), style = Typo.Secondary, color = MediaColors.Accent.copy(alpha = 0.9f),
+                    maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                Spacer(Modifier.width(Space.sm))
+                MiniWave(state, Modifier.weight(1f).height(12.dp))
+            }
         }
         Spacer(Modifier.width(Space.sm))
         // Matching CENTRES was not enough. Measured on a Redmi
@@ -963,9 +979,11 @@ private fun BoxScope.MiniChrome(
             Box(
                 Modifier.size(MINI_ART.dp).clip(CircleShape)
                     .background(
-                        if (darkTheme) Color.White.copy(alpha = 0.09f)
-                        else Color.Black.copy(alpha = 0.06f)
-                    ),
+                        if (darkTheme) Brush.radialGradient(
+                            listOf(Via.Accent.copy(alpha = 0.30f), Via.Violet.copy(alpha = 0.18f))
+                        ) else Brush.linearGradient(listOf(Color.Black.copy(alpha = 0.06f), Color.Black.copy(alpha = 0.06f)))
+                    )
+                    .border(1.dp, Via.Accent.copy(alpha = if (darkTheme) 0.45f else 0f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 PlayPauseIcon(
@@ -999,6 +1017,34 @@ private fun BoxScope.MiniChrome(
             end = Offset(size.width * prog, y),
             strokeWidth = size.height, cap = StrokeCap.Round
         )
+    }
+}
+
+/**
+ * The mini-player's little waveform: a fixed shape per track, lit in cyan up
+ * to where playback is. Progress you can see, at no cost per frame.
+ */
+@Composable
+private fun MiniWave(state: PlayerState, modifier: Modifier) {
+    val accent = MediaColors.Accent
+    val faint = MediaColors.CreamFaint
+    val seed = (state.currentUri ?: state.currentTitle).hashCode()
+    val prog = if (state.durationMs > 0) (state.positionMs.toFloat() / state.durationMs).coerceIn(0f, 1f) else 0f
+    Canvas(modifier) {
+        val bars = 24
+        val step = size.width / bars
+        val w = step * 0.55f
+        for (b in 0 until bars) {
+            val n = kotlin.math.sin(b * 0.9f + seed * 0.001f) * 0.5f + kotlin.math.sin(b * 2.3f + seed * 0.0003f) * 0.5f
+            val h = size.height * (0.30f + 0.70f * kotlin.math.abs(n))
+            val lit = (b + 0.5f) / bars <= prog
+            drawRoundRect(
+                color = if (lit) accent else faint.copy(alpha = 0.35f),
+                topLeft = Offset(b * step, (size.height - h) / 2f),
+                size = androidx.compose.ui.geometry.Size(w, h),
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius(w / 2f)
+            )
+        }
     }
 }
 
