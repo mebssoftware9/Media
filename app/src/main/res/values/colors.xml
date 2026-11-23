@@ -5,6 +5,6 @@
 
     <!-- Window background. Only visible before Compose draws (cold start,
          rotation). Matches Via.Ground so the handover is invisible. -->
-    <color name="window_ink">#050816</color>
+    <color name="window_ink">#000000</color>
 
 </resources>

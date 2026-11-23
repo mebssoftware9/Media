@@ -452,7 +452,7 @@ private fun PermissionGate(
 // applied separately via navigationBarsPadding). The mini-player floats a
 // small gap above this — both derive from BottomBarHeight so they never drift.
 // 64dp: 58 left the icon+label pair touching both edges of the bar.
-private val BottomBarHeight = 64.dp
+private val BottomBarHeight = 72.dp
 private val MiniPlayerGap = 12.dp
 
 /**
@@ -966,14 +966,6 @@ private fun HomeFeed(
             }
         }
         val streak by Retention.streak.collectAsState()
-        // The room behind Home: what is playing, else what was played last,
-        // else the first thing on this page (HomeHero.kt).
-        val atmosphereArt = remember(state.currentUri, lib.lastPlayed, nav.homePillar, byPillar) {
-            state.currentUri?.let { u -> lib.allAudio.firstOrNull { it.uri.toString() == u } }
-                ?: lib.lastPlayed.maxByOrNull { it.value }?.key?.let { lib.allById[it] }?.takeIf { it.type == MediaType.AUDIO }
-                ?: byPillar[nav.homePillar]?.firstOrNull { it.type == MediaType.AUDIO }
-        }
-        HomeAtmosphere(atmosphereArt)
 
         Column(Modifier.fillMaxSize().statusBarsPadding()) {
             // FIXED top region - does not scroll. The header and the bar are
@@ -1761,7 +1753,7 @@ private fun BottomBar(
         modifier.fillMaxWidth()
             .navigationBarsPadding()
             .height(BottomBarHeight)
-            .padding(horizontal = 12.dp, vertical = 3.dp)
+            .padding(horizontal = 12.dp, vertical = 4.dp)
     ) {
         Row(
             Modifier.matchParentSize()

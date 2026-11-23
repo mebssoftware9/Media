@@ -65,8 +65,6 @@ import kotlin.math.abs
 //  built from the listener's OWN artwork, as the blueprint itself asks
 //  ("real album artwork and adaptive media colors"), never stock imagery.
 //
-//      HomeAtmosphere   the hero's cover, huge and soft, sunk into midnight,
-//                       with a cyan and a violet light and a few stars
 //      HeroCarousel     continue listening / most played / rediscover, one
 //                       card at a time, Play now, page dots, gentle advance
 //      JumpBackInRow    glass cards with a play button; the streak first
@@ -87,67 +85,6 @@ class HeroSlide(
     val progress: Float?,
     val onPlay: () -> Unit
 )
-
-/** The hero's cover spread into the room behind Home. Drawn under everything. */
-@Composable
-fun BoxScope.HomeAtmosphere(art: AppMediaItem?) {
-    val ink = MediaColors.Ink
-    val cyan = MediaColors.Accent
-    val violet = Via.Violet
-    Box(Modifier.matchParentSize()) {
-        // The cover, huge and out of focus at the top of the room. Android
-        // 12+ blurs it; before that a tiny decode scaled up is soft enough.
-        Crossfade(targetState = art, animationSpec = tween(900), label = "homeAtmosphere") { a ->
-            if (a != null) {
-                val soft = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-                CoverArt(
-                    a,
-                    Modifier.fillMaxWidth().aspectRatio(0.9f).alpha(0.62f)
-                        .then(if (soft) Modifier.blur(56.dp) else Modifier),
-                    corner = 0,
-                    targetPx = if (soft) 256 else 48
-                )
-            }
-        }
-        // Light and depth: the room sinks to midnight below the hero, a cyan
-        // light from the top left, a violet one from the right.
-        Canvas(Modifier.matchParentSize()) {
-            val w = size.width
-            val h = size.height
-            drawRect(
-                Brush.verticalGradient(
-                    0f to ink.copy(alpha = 0.10f),
-                    0.28f to ink.copy(alpha = 0.55f),
-                    0.55f to ink.copy(alpha = 0.92f),
-                    1f to ink
-                )
-            )
-            drawRect(Brush.radialGradient(
-                listOf(cyan.copy(alpha = 0.22f), Color.Transparent),
-                center = Offset(w * 0.05f, h * 0.10f), radius = w * 0.85f
-            ))
-            drawRect(Brush.radialGradient(
-                listOf(violet.copy(alpha = 0.30f), Color.Transparent),
-                center = Offset(w * 1.0f, h * 0.30f), radius = w * 0.95f
-            ))
-            drawRect(Brush.radialGradient(
-                listOf(violet.copy(alpha = 0.16f), Color.Transparent),
-                center = Offset(w * 0.2f, h * 0.95f), radius = w * 0.9f
-            ))
-            // A few still stars, the same every time.
-            var seed = 0x2545F491
-            repeat(46) {
-                seed = seed * 1103515245 + 12345
-                val x = ((seed ushr 8) and 0xFFFF) / 65535f * w
-                seed = seed * 1103515245 + 12345
-                val y = ((seed ushr 8) and 0xFFFF) / 65535f * h * 0.75f
-                seed = seed * 1103515245 + 12345
-                val a = 0.15f + ((seed ushr 8) and 0xFF) / 255f * 0.45f
-                drawCircle(Color.White.copy(alpha = a), radius = 0.6f + a * 1.4f, center = Offset(x, y))
-            }
-        }
-    }
-}
 
 /** One editorial feature at a time: big artwork, short copy, one action. */
 @Composable
@@ -208,7 +145,7 @@ private fun HeroCard(s: HeroSlide, modifier: Modifier = Modifier) {
     ) {
         // The cover on the right, lit from behind.
         Box(
-            Modifier.align(Alignment.CenterEnd).offset(x = 18.dp).size(176.dp)
+            Modifier.align(Alignment.CenterEnd).padding(end = 6.dp).size(168.dp)
                 .drawBehind {
                     drawCircle(
                         Brush.radialGradient(listOf(cyan.copy(alpha = 0.40f), violet.copy(alpha = 0.18f), Color.Transparent)),

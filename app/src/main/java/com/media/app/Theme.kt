@@ -46,7 +46,9 @@ object Via {
     // highlights and atmosphere, midnight ink as the floor.
     val Accent = Color(0xFF20E6F2)   // signature: active tab, playback, progress, primary action
     val Violet = Color(0xFF8B4DFF)   // accent: secondary highlights, artwork atmosphere
-    val Ground = Color(0xFF050816)   // base: midnight ink
+    // The floor stays black: the artwork background (AppBackdrop.kt) is lit
+    // from the cover over it, and a tinted floor muddies every cover.
+    val Ground = Color(0xFF000000)
 }
 
 enum class Mood(
@@ -118,18 +120,18 @@ val DarkPalette = Palette(
     // Was a purple-navy cast (#17141F and friends). A tinted ground under
     // full-colour album art muddies every warm cover on the screen, so the
     // floor is neutral now and the artwork supplies the colour.
-    bg = Via.Ground,                 // #050816 midnight ink
-    surface = Color(0xFF0A1020),     // +1 step
-    elevated = Color(0xFF10172B),    // +2 - cards, panels (the blueprint's deep slate)
-    floating = Color(0xFF182139),    // +3 - reads above scrolling content
+    bg = Via.Ground,                 // #000000 - the cover's light is the colour
+    surface = Color(0xFF0B0B0D),     // +1 step
+    elevated = Color(0xFF15151A),    // +2 - cards, panels
+    floating = Color(0xFF1F1F26),    // +3 - reads above scrolling content
     // Was 0xFF292930. On a pure black floor that is a grey slab, and it read
     // as a leftover from the old grey design every time a sheet came up. A
     // sheet does not need to out-lighten the page to look raised: it sits on
     // a 0xCC scrim that has already taken the page to near-black, and it has
     // a Fill border and rounded top corners. Those do the separating -
     // lightness was only making it grey.
-    modal = Color(0xFF141C33),       // +4 - sheets sit highest
-    hairline = Color(0xFF283252),    // cool rule
+    modal = Color(0xFF1A1A21),       // +4 - sheets sit highest
+    hairline = Color(0xFF33333B),    // neutral rule
     text = Color(0xFFF2F3F5),
     textDim = Color(0xFFA8AEBA),
     // 5.8:1 on `elevated`, the worst surface it lands on. The deeper floor
