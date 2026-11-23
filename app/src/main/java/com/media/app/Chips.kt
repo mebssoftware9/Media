@@ -1,5 +1,7 @@
 package com.media.app
 
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.draw.shadow
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -166,6 +168,10 @@ private val PillIconGap = 5.dp
 private val PillPadMax = 14.dp
 private val PillPadMin = 8.dp
 
+/** The lit pill's fill and its label, on the dark theme. */
+private val PillLit = androidx.compose.ui.graphics.Color(0xFF20E6F2)
+private val PillOnLit = androidx.compose.ui.graphics.Color(0xFF02232A)
+
 @Composable
 fun PillTabs(
     labels: List<String>,
@@ -174,8 +180,12 @@ fun PillTabs(
     modifier: Modifier = Modifier,
     onPick: (Int) -> Unit
 ) {
-    val accent = MediaColors.Accent
-    val onAccent = MediaColors.OnAccent
+    // The current pill lights up: on the dark theme it is filled with a
+    // brighter, luminous cyan and glows a little into the room around it;
+    // the others are quiet glass with a hairline edge. Light theme as before.
+    val dark = MediaColors.Ink.luminance() < 0.5f
+    val accent = if (dark) PillLit else MediaColors.Accent
+    val onAccent = if (dark) PillOnLit else MediaColors.OnAccent
     val rest = MediaColors.FillStrong
     val ink = MediaColors.Cream
     val full = Typo.Label.copy(fontWeight = FontWeight.SemiBold)
@@ -232,8 +242,20 @@ fun PillTabs(
                         }
                         .pressScale { onPick(i) }
                         .height(PillHeight)
+                        .then(
+                            if (dark) Modifier.shadow(
+                                (10f * near).dp, RoundedCornerShape(Radius.pill),
+                                ambientColor = accent, spotColor = accent
+                            ) else Modifier
+                        )
                         .clip(RoundedCornerShape(Radius.pill))
                         .background(fill)
+                        .then(
+                            if (dark) Modifier.border(
+                                1.dp, androidx.compose.ui.graphics.Color.White.copy(alpha = 0.10f * (1f - near)),
+                                RoundedCornerShape(Radius.pill)
+                            ) else Modifier
+                        )
                         .padding(horizontal = pad),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
