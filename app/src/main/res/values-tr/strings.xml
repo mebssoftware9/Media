@@ -424,12 +424,6 @@
     <string name="search_hint">Kitaplığında ara</string>
     <string name="search_recent">Son aramalar</string>
     <string name="search_recent_remove">Son aramalardan kaldır</string>
-    <string name="hero_play_now">Şimdi çal</string>
-    <string name="hero_continue">Dinlemeye devam et</string>
-    <string name="hero_most_played">En çok dinlediklerin</string>
-    <string name="hero_rediscover">Yeniden keşfet</string>
-    <string name="hero_journey">Müzik yolculuğun</string>
-    <string name="hero_jump_back_in">Kaldığın yerden</string>
     <string name="art_mode_still">Kapak: sabit. Müzikle hareket etmesi için dokunun</string>
     <string name="art_mode_reactive">Kapak müzikle hareket ediyor. Gizlemek için dokunun</string>
     <string name="art_mode_hidden">Kapak gizli, dünya ekranı dolduruyor. Geri getirmek için dokunun</string>

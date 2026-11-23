@@ -409,12 +409,6 @@
     <string name="search_hint">Cari di koleksimu</string>
     <string name="search_recent">Pencarian terbaru</string>
     <string name="search_recent_remove">Hapus dari pencarian terbaru</string>
-    <string name="hero_play_now">Putar sekarang</string>
-    <string name="hero_continue">Lanjutkan mendengarkan</string>
-    <string name="hero_most_played">Paling sering diputar</string>
-    <string name="hero_rediscover">Temukan lagi</string>
-    <string name="hero_journey">Perjalanan musikmu</string>
-    <string name="hero_jump_back_in">Lanjutkan lagi</string>
     <string name="art_mode_still">Sampul: diam. Ketuk agar bergerak mengikuti musik</string>
     <string name="art_mode_reactive">Sampul bergerak mengikuti musik. Ketuk untuk menyembunyikan</string>
     <string name="art_mode_hidden">Sampul disembunyikan, dunia memenuhi layar. Ketuk untuk menampilkannya lagi</string>

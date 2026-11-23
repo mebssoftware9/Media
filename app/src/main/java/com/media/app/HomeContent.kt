@@ -163,6 +163,54 @@ fun pillarIcon(p: Pillar): ImageVector = when (p) {
     Pillar.RECORDING -> Icons.Rounded.Mic
 }
 
+// ------------------------------------------------------------------ RESUME
+//
+// The one genuinely actionable thing the six home shelves offered was the
+// track you did not finish. It is one slim bar now, not a rail of cards under
+// a 19sp header.
+@Composable
+fun ResumeBar(item: AppMediaItem, progress: Float, onPlay: () -> Unit) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Space.xl, vertical = Space.sm)
+            .clip(RoundedCornerShape(Radius.md))
+            .background(MediaColors.FillSubtle)
+            .border(1.dp, MediaColors.Fill, RoundedCornerShape(Radius.md))
+            .pressScale(haptic = true, onClick = onPlay)
+            .padding(Space.sm),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        CoverArt(item, Modifier.size(44.dp), corner = 10, targetPx = 144)
+        Spacer(Modifier.width(Space.md))
+        Column(Modifier.weight(1f)) {
+            Text(stringResource(R.string.label_resume_caps), style = Typo.Micro, color = MediaColors.Accent)
+            Spacer(Modifier.height(3.dp))
+            Text(
+                shownTitle(item.title), style = Typo.Primary, color = MediaColors.Cream,
+                maxLines = 1, overflow = TextOverflow.Ellipsis
+            )
+            Spacer(Modifier.height(7.dp))
+            Box(
+                Modifier.fillMaxWidth().height(2.dp)
+                    .clip(RoundedCornerShape(Radius.pill))
+                    .background(MediaColors.Fill)
+            ) {
+                Box(
+                    Modifier.fillMaxWidth(progress).fillMaxHeight()
+                        .clip(RoundedCornerShape(Radius.pill))
+                        .background(MediaColors.Accent)
+                )
+            }
+        }
+        Spacer(Modifier.width(Space.md))
+        Icon(
+            Icons.Filled.PlayArrow, null, tint = MediaColors.Cream,
+            modifier = Modifier.size(26.dp)
+        )
+    }
+}
+
 // ------------------------------------------------------------------ FILTER
 //
 // Replaces the five permanent mood chips. Those sat under the header on every
@@ -341,7 +389,90 @@ private fun fmtDur(ms: Long): String {
     return "%d:%02d".format(m, sec)
 }
 
-// Jump back in: HomeHero.kt (JumpBackInRow), with the hero carousel.
+// ------------------------------------------------------------ JUMP BACK IN
+//
+// The retention row: what you played last in this format, one tap from
+// playing again, led by the listening streak (Retention.kt). One compact
+// rail at the top of the list, scrolled away with it - not the six stacked
+// shelves this screen once had. Absent until there is something to show.
+private val RecentTile = 64.dp
+
+@Composable
+fun JumpBackIn(
+    streak: Streak,
+    recent: List<AppMediaItem>,
+    playingUri: String?,
+    onPlay: (Int) -> Unit
+) {
+    val showStreak = streak.days > 0
+    if (!showStreak && recent.isEmpty()) return
+    Column(Modifier.fillMaxWidth().padding(top = Space.sm, bottom = Space.xs)) {
+        Text(
+            stringResource(R.string.label_jump_back_in_caps), style = Typo.Micro, color = MediaColors.Accent,
+            modifier = Modifier.padding(start = Space.xl, bottom = Space.sm)
+        )
+        androidx.compose.foundation.lazy.LazyRow(
+            contentPadding = PaddingValues(horizontal = Space.xl),
+            horizontalArrangement = Arrangement.spacedBy(Space.md)
+        ) {
+            if (showStreak) item(key = "streak") { StreakTile(streak) }
+            items(recent.size, key = { recent[it].id }) { i ->
+                val item = recent[i]
+                val playing = playingUri == item.uri.toString()
+                Column(
+                    Modifier.width(RecentTile)
+                        .pressScale(haptic = true) { onPlay(i) }
+                ) {
+                    CoverArt(item, Modifier.size(RecentTile), corner = 12, targetPx = 192)
+                    Spacer(Modifier.height(Space.xs))
+                    Text(
+                        shownTitle(item.title), style = Typo.Tertiary,
+                        color = if (playing) MediaColors.Accent else MediaColors.CreamDim,
+                        maxLines = 1, overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StreakTile(streak: Streak) {
+    // At risk (yesterday was the last play) the tile says so, in words; lit,
+    // it says how much this week has held. The flame dims when at risk.
+    val lit = streak.playedToday
+    val shape = RoundedCornerShape(12.dp)
+    Column(Modifier.width(124.dp)) {
+        Column(
+            Modifier.fillMaxWidth().height(RecentTile)
+                .clip(shape)
+                .background(MediaColors.Accent.copy(alpha = if (lit) 0.16f else 0.08f))
+                .border(1.dp, MediaColors.Accent.copy(alpha = if (lit) 0.35f else 0.18f), shape)
+                .padding(horizontal = Space.md),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                Icons.Filled.LocalFireDepartment, null,
+                tint = if (lit) MediaColors.Accent else MediaColors.CreamFaint,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(Modifier.height(Space.xxs))
+            Text(
+                plural(R.plurals.streak_days, streak.days),
+                style = Typo.Label, color = MediaColors.Cream,
+                maxLines = 1, overflow = TextOverflow.Ellipsis
+            )
+        }
+        Spacer(Modifier.height(Space.xs))
+        Text(
+            if (lit) plural(R.plurals.plays_this_week, streak.weekPlays)
+            else stringResource(R.string.streak_keep),
+            style = Typo.Tertiary,
+            color = if (lit) MediaColors.CreamFaint else MediaColors.Accent,
+            maxLines = 1, overflow = TextOverflow.Ellipsis
+        )
+    }
+}
 
 // ------------------------------------------------------------ EMPTY FORMAT
 //

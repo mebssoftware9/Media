@@ -41,14 +41,8 @@ import androidx.compose.ui.unit.sp
 //  would read uninitialised file-level properties.
 // ============================================================================
 object Via {
-    // The blueprint's colour roles (Immersive Experience Blueprint, 12):
-    // signature luminous cyan for what is active, ultraviolet for secondary
-    // highlights and atmosphere, midnight ink as the floor.
-    val Accent = Color(0xFF20E6F2)   // signature: active tab, playback, progress, primary action
-    val Violet = Color(0xFF8B4DFF)   // accent: secondary highlights, artwork atmosphere
-    // The floor stays black: the artwork background (AppBackdrop.kt) is lit
-    // from the cover over it, and a tinted floor muddies every cover.
-    val Ground = Color(0xFF000000)
+    val Accent = Color(0xFF2DD4BF)   // active state, progress, selection
+    val Ground = Color(0xFF000000)   // near black — the one flat floor
 }
 
 enum class Mood(
@@ -120,7 +114,7 @@ val DarkPalette = Palette(
     // Was a purple-navy cast (#17141F and friends). A tinted ground under
     // full-colour album art muddies every warm cover on the screen, so the
     // floor is neutral now and the artwork supplies the colour.
-    bg = Via.Ground,                 // #000000 - the cover's light is the colour
+    bg = Via.Ground,                 // #000000 — pixels off on OLED
     surface = Color(0xFF0B0B0D),     // +1 step
     elevated = Color(0xFF15151A),    // +2 - cards, panels
     floating = Color(0xFF1F1F26),    // +3 - reads above scrolling content
@@ -138,8 +132,8 @@ val DarkPalette = Palette(
     // bought contrast back rather than spending it.
     textFaint = Color(0xFF8B929E),
     accent = Via.Accent,             // the ONLY accent in the app
-    onAccent = Color(0xFF02232A),
-    onInverse = Via.Ground
+    onAccent = Color(0xFF06231F),
+    onInverse = Via.Ground           // was a leftover purple
 )
 
 // Light kept as a graceful fallback (screenshots are dark-first).
@@ -154,7 +148,7 @@ val LightPalette = Palette(
     text = Color(0xFF16161C),
     textDim = Color(0xFF5C5C68),
     textFaint = Color(0xFF9A9AA8),
-    accent = Color(0xFF0AA6B4),
+    accent = Color(0xFF17B3A0),
     onAccent = Color(0xFFFFFFFF),
     onInverse = Color(0xFFFFFFFF)
 )

@@ -1,7 +1,5 @@
 package com.media.app
 
-import androidx.compose.ui.draw.shadow
-
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -234,12 +232,8 @@ fun PillTabs(
                         }
                         .pressScale { onPick(i) }
                         .height(PillHeight)
-                        // The current pill glows in the signature cyan; the
-                        // rest are quiet glass with a hairline edge.
-                        .shadow((10f * near).dp, RoundedCornerShape(Radius.pill), ambientColor = accent, spotColor = accent)
                         .clip(RoundedCornerShape(Radius.pill))
                         .background(fill)
-                        .border(1.dp, androidx.compose.ui.graphics.Color.White.copy(alpha = 0.10f * (1f - near)), RoundedCornerShape(Radius.pill))
                         .padding(horizontal = pad),
                     verticalAlignment = Alignment.CenterVertically
                 ) {

@@ -3,8 +3,15 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
+    <!-- Mirrors the Kotlin palette so the ad card matches the Compose
+         surfaces. XML cannot read Theme.kt, so this is kept in sync by hand.
+         Every value here was still the old purple theme, which is why the ad
+         card sat on the home screen as a violet slab among neutral rows. -->
+
     <!-- Window background. Only visible before Compose draws (cold start,
          rotation). Matches Via.Ground so the handover is invisible. -->
     <color name="window_ink">#000000</color>
 
+    <!-- The CTA label was white on the accent fill: 2.1:1, unreadable. Dark
+         on accent is the same pairing Compose uses for onAccent. -->
 </resources>

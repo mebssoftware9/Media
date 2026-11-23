@@ -424,12 +424,6 @@
     <string name="search_hint">Rechercher dans votre bibliothèque</string>
     <string name="search_recent">Recherches récentes</string>
     <string name="search_recent_remove">Retirer des recherches récentes</string>
-    <string name="hero_play_now">Écouter</string>
-    <string name="hero_continue">Reprendre l\'écoute</string>
-    <string name="hero_most_played">Vos plus écoutés</string>
-    <string name="hero_rediscover">Redécouvrir</string>
-    <string name="hero_journey">Votre voyage musical</string>
-    <string name="hero_jump_back_in">Reprendre</string>
     <string name="art_mode_still">Pochette : fixe. Touchez pour qu\'elle bouge avec la musique</string>
     <string name="art_mode_reactive">La pochette bouge avec la musique. Touchez pour la masquer</string>
     <string name="art_mode_hidden">Pochette masquée, le monde remplit l\'écran. Touchez pour la remettre</string>

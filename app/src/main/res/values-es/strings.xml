@@ -424,12 +424,6 @@
     <string name="search_hint">Busca en tu biblioteca</string>
     <string name="search_recent">Búsquedas recientes</string>
     <string name="search_recent_remove">Quitar de búsquedas recientes</string>
-    <string name="hero_play_now">Reproducir</string>
-    <string name="hero_continue">Sigue escuchando</string>
-    <string name="hero_most_played">Lo que más escuchas</string>
-    <string name="hero_rediscover">Redescubre</string>
-    <string name="hero_journey">Tu viaje musical</string>
-    <string name="hero_jump_back_in">Vuelve a escuchar</string>
     <string name="art_mode_still">Portada: fija. Toca para que se mueva con la música</string>
     <string name="art_mode_reactive">La portada se mueve con la música. Toca para ocultarla</string>
     <string name="art_mode_hidden">Portada oculta, el mundo llena la pantalla. Toca para recuperarla</string>

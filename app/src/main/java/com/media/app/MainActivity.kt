@@ -452,7 +452,7 @@ private fun PermissionGate(
 // applied separately via navigationBarsPadding). The mini-player floats a
 // small gap above this — both derive from BottomBarHeight so they never drift.
 // 64dp: 58 left the icon+label pair touching both edges of the bar.
-private val BottomBarHeight = 72.dp
+private val BottomBarHeight = 64.dp
 private val MiniPlayerGap = 12.dp
 
 /**
@@ -894,7 +894,7 @@ fun HomeScaffold(vm: PlayerViewModel) {
                 settings = settings, setMood = setMood, sharing = shareState.sharing
             )
             HomeDetails(nav = nav, lib = lib, state = state, vm = vm, db = db, scope = scope)
-            HomeChrome(nav = nav, state = state, vm = vm, music = lib.music)
+            HomeChrome(nav = nav, state = state, vm = vm)
             HomePlayer(
                 nav = nav, lib = lib, state = state, vm = vm, db = db, scope = scope,
                 playingItem = playingItem, libraryPlaying = libraryPlaying, beat = beat,
@@ -1049,19 +1049,6 @@ private fun HomeFormatPage(
             .sortedByDescending { lib.lastPlayed[it.id] }
             .take(12)
     }
-    // One editorial feature at a time (HomeHero.kt): continue, most played,
-    // rediscover. The resume card is the first of them.
-    val slides = remember(inPillar, resume, lib.lastPlayed, lib.playCounts) {
-        heroSlidesFor(
-            pillar = pillar, inPillar = inPillar, resume = resume,
-            lastPlayed = lib.lastPlayed, playCounts = lib.playCounts,
-            play = { list, i ->
-                vm.play(list, i)
-                if (list[i].type == MediaType.VIDEO) nav.showPlayer = true
-            },
-            playAt = { item, ms -> vm.playAt(item, ms) }
-        )
-    }
 
     Column(Modifier.fillMaxSize()) {
         // Present only while a collection opened from Playlists is actually
@@ -1083,8 +1070,14 @@ private fun HomeFormatPage(
                 modifier = Modifier.fillMaxSize()
             ) {
                 item {
-                    HeroCarousel(slides)
-                    JumpBackInRow(
+                    resume?.let { (track, pos) ->
+                        ResumeBar(
+                            item = track,
+                            progress = (pos.positionMs.toFloat() / pos.durationMs).coerceIn(0f, 1f),
+                            onPlay = { vm.playAt(track, pos.positionMs) }
+                        )
+                    }
+                    JumpBackIn(
                         streak = streak,
                         recent = recent,
                         playingUri = state.currentUri,
@@ -1398,26 +1391,14 @@ private fun HomeDetails(
 }
 
 @Composable
-private fun BoxScope.HomeChrome(nav: HomeNav, state: PlayerState, vm: PlayerViewModel, music: List<AppMediaItem>) {
+private fun BoxScope.HomeChrome(nav: HomeNav, state: PlayerState, vm: PlayerViewModel) {
     // ---- PERSISTENT chrome: mini-player + bottom nav, above all overlays ----
     LaunchedEffect(state.isPlaying, state.currentUri) {
         if (state.isPlaying) nav.playerHidden = false
         else if (state.hasItem) { delay(10_000); nav.playerHidden = true }
     }
     // Search is no longer a tab - it lives in the header.
-    BottomBar(
-        Modifier.align(Alignment.BottomCenter), current = nav.currentTab,
-        playing = state.isPlaying,
-        // The centre button: play / pause what is loaded; with nothing
-        // loaded, shuffle the music library.
-        onCentre = {
-            if (state.hasItem) vm.togglePlayPause()
-            else if (music.isNotEmpty()) {
-                if (!state.shuffle) vm.toggleShuffle()
-                vm.play(music, music.indices.random())
-            }
-        }
-    ) { tab -> nav.selectTab(tab) }
+    BottomBar(Modifier.align(Alignment.BottomCenter), current = nav.currentTab) { tab -> nav.selectTab(tab) }
     // ---- Surfaces that must sit ABOVE the persistent chrome ----
     // Order matters: everything below is drawn after BottomBar, so the nav bar
     // and mini-player no longer paint over the full player and the info pages.
@@ -1738,52 +1719,45 @@ private fun EmptyState(mood: Mood, onRescan: () -> Unit, onClearMood: () -> Unit
 private fun BottomBar(
     modifier: Modifier = Modifier,
     current: Int,
-    playing: Boolean,
-    onCentre: () -> Unit,
     onSelect: (Int) -> Unit
 ) {
-    // The blueprint's floating glass bar: a capsule lit at its edge in cyan
-    // and violet, the content running on underneath it, and the play button
-    // standing up out of its middle. Same height as before, so the
-    // mini-player and every list's bottom padding are where they were.
-    val cyan = MediaColors.Accent
-    val violet = Via.Violet
-    val shape = RoundedCornerShape(30.dp)
-    Box(
+    Column(
         modifier.fillMaxWidth()
+            // The room's light runs on under the bar, lined up with the
+            // screen above it, a step darker so the bar still reads as one.
+            .screenBackground(extraScrim = 0.10f)
             .navigationBarsPadding()
-            .height(BottomBarHeight)
-            .padding(horizontal = 12.dp, vertical = 4.dp)
     ) {
+        // Hairline on the TOP EDGE only. .border() drew a 0.5dp box on all
+        // four sides, which is why the bar read as a slab with an outline
+        // rather than a surface the content scrolls under.
+        // A black shadow gradient over a near-black floor reads as a visible
+        // STRIPE, not depth. Now that the background floor is darker than
+        // NavSurface, the bar separates on its own tonally - the hairline is
+        // all the definition it needs.
+        Box(Modifier.fillMaxWidth().height(0.5.dp).background(MediaColors.Fill))
         Row(
-            Modifier.matchParentSize()
-                .shadow(18.dp, shape, ambientColor = violet, spotColor = violet)
-                .clip(shape)
-                .background(Brush.horizontalGradient(listOf(Color(0xF00E1730), Color(0xF0170F38))))
-                .border(1.dp, Brush.horizontalGradient(listOf(cyan.copy(alpha = 0.50f), violet.copy(alpha = 0.55f))), shape)
-                .padding(horizontal = Space.xs),
+            // weight(1f) centred each tab in its own quarter, so the outer two
+            // always sat an eighth of the screen in from the edges. Fixed-width
+            // tabs with SpaceBetween anchor the first and last to the margins
+            // and distribute the slack between them instead. 68dp x4 still
+            // fits a 320dp screen with room to spare.
+            Modifier.fillMaxWidth().height(BottomBarHeight)
+                .padding(horizontal = Space.sm),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val tab = Modifier.width(62.dp)
+            val tab = Modifier.width(68.dp)
             NavTab(Icons.Filled.Home, Icons.Outlined.Home, stringResource(R.string.nav_home), current == 0, tab) { onSelect(0) }
+            // Was LibraryBooks - a stack of BOOKS, in a music app. The core
+            // set has a music-library icon; nothing exotic was needed.
             NavTab(Icons.Filled.LibraryMusic, Icons.Outlined.LibraryMusic,
                 stringResource(R.string.nav_library), current == 1, tab) { onSelect(1) }
-            Spacer(Modifier.width(64.dp))
             NavTab(Icons.AutoMirrored.Filled.QueueMusic, Icons.AutoMirrored.Outlined.QueueMusic, stringResource(R.string.nav_playlists), current == 2, tab) { onSelect(2) }
+            // Tune is the EQUALISER glyph (sliders) - in a music app that
+            // reads as an EQ feature, not "more". Menu (hamburger) signals a
+            // drawer that doesn't exist. The tab is settings; show a gear.
             NavTab(Icons.Filled.Settings, Icons.Outlined.Settings, stringResource(R.string.nav_more), current == 3, tab) { onSelect(3) }
-        }
-        // The centre play button, standing up out of the bar.
-        Box(
-            Modifier.align(Alignment.TopCenter).offset(y = (-14).dp).size(58.dp)
-                .shadow(20.dp, CircleShape, ambientColor = cyan, spotColor = cyan)
-                .clip(CircleShape)
-                .background(Brush.linearGradient(listOf(cyan, violet)))
-                .border(1.5.dp, Color.White.copy(alpha = 0.35f), CircleShape)
-                .pressScale(scaleDown = 0.92f, haptic = true, onClick = onCentre),
-            contentAlignment = Alignment.Center
-        ) {
-            PlayPauseIcon(playing, Color.White, Modifier.size(28.dp), stringResource(R.string.action_play_pause))
         }
     }
 }

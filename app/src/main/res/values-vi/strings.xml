@@ -409,12 +409,6 @@
     <string name="search_hint">Tìm trong thư viện của bạn</string>
     <string name="search_recent">Tìm kiếm gần đây</string>
     <string name="search_recent_remove">Xoá khỏi tìm kiếm gần đây</string>
-    <string name="hero_play_now">Phát ngay</string>
-    <string name="hero_continue">Nghe tiếp</string>
-    <string name="hero_most_played">Nghe nhiều nhất</string>
-    <string name="hero_rediscover">Khám phá lại</string>
-    <string name="hero_journey">Hành trình âm nhạc</string>
-    <string name="hero_jump_back_in">Nghe lại</string>
     <string name="art_mode_still">Ảnh bìa: tĩnh. Chạm để ảnh chuyển động theo nhạc</string>
     <string name="art_mode_reactive">Ảnh bìa chuyển động theo nhạc. Chạm để ẩn</string>
     <string name="art_mode_hidden">Đã ẩn ảnh bìa, thế giới phủ kín màn hình. Chạm để hiện lại</string>
