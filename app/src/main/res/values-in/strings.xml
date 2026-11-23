@@ -239,6 +239,7 @@
     <string name="action_play_pause">Putar/Jeda</string>
     <string name="action_next">Berikutnya</string>
     <string name="video_forward_10">Maju 10 detik</string>
+    <string name="skip_forward_30">Maju 30 detik</string>
     <string name="cd_app_mark">Via</string>
     <string name="share_playing_elsewhere">Diputar di perangkat lain</string>
     <string name="share_name">Via Share</string>

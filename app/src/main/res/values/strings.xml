@@ -251,6 +251,7 @@
     <string name="action_play_pause">Play/Pause</string>
     <string name="action_next">Next</string>
     <string name="video_forward_10">Forward 10 seconds</string>
+    <string name="skip_forward_30">Forward 30 seconds</string>
     <string name="cd_app_mark">Via</string>
     <string name="share_playing_elsewhere">Playing on another device</string>
     <string name="share_name">Via Share</string>

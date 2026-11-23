@@ -239,6 +239,7 @@
     <string name="action_play_pause">Phát/Tạm dừng</string>
     <string name="action_next">Tiếp</string>
     <string name="video_forward_10">Tới 10 giây</string>
+    <string name="skip_forward_30">Tới 30 giây</string>
     <string name="cd_app_mark">Via</string>
     <string name="share_playing_elsewhere">Đang phát trên thiết bị khác</string>
     <string name="share_name">Via Share</string>

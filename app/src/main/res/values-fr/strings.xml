@@ -247,6 +247,7 @@
     <string name="action_play_pause">Lecture/Pause</string>
     <string name="action_next">Suivant</string>
     <string name="video_forward_10">Avancer de 10 secondes</string>
+    <string name="skip_forward_30">Avancer de 30 secondes</string>
     <string name="cd_app_mark">Via</string>
     <string name="share_playing_elsewhere">Lecture sur un autre appareil</string>
     <string name="share_name">Via Share</string>

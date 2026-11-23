@@ -239,6 +239,7 @@
     <string name="action_play_pause">再生/一時停止</string>
     <string name="action_next">次へ</string>
     <string name="video_forward_10">10秒進む</string>
+    <string name="skip_forward_30">30秒進む</string>
     <string name="cd_app_mark">Via</string>
     <string name="share_playing_elsewhere">別のデバイスで再生中</string>
     <string name="share_name">Via Share</string>

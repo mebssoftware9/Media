@@ -263,6 +263,7 @@
     <string name="action_play_pause">Воспроизведение/пауза</string>
     <string name="action_next">Следующий</string>
     <string name="video_forward_10">Вперёд на 10 секунд</string>
+    <string name="skip_forward_30">Вперёд на 30 секунд</string>
     <string name="cd_app_mark">Via</string>
     <string name="share_playing_elsewhere">Играет на другом устройстве</string>
     <string name="share_name">Via Share</string>

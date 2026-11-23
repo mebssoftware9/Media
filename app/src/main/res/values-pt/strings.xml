@@ -247,6 +247,7 @@
     <string name="action_play_pause">Tocar/Pausar</string>
     <string name="action_next">Próxima</string>
     <string name="video_forward_10">Avançar 10 segundos</string>
+    <string name="skip_forward_30">Avançar 30 segundos</string>
     <string name="cd_app_mark">Via</string>
     <string name="share_playing_elsewhere">Tocando em outro dispositivo</string>
     <string name="share_name">Via Share</string>

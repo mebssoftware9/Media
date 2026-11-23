@@ -39,7 +39,9 @@ data class PlayerState(
     val sleepRemainingMs: Long = 0L,
     val sleepEndOfTrack: Boolean = false,
     val queueIndex: Int = 0,
-    val queueSize: Int = 0
+    val queueSize: Int = 0,
+    /** A podcast episode or audiobook: Now Playing adds skip back and forward. */
+    val longForm: Boolean = false
 )
 
 // ============================================================================
@@ -279,7 +281,8 @@ class PlayerViewModel(app: Application) : AndroidViewModel(app) {
             sleepRemainingMs = prev.sleepRemainingMs,
             sleepEndOfTrack = prev.sleepEndOfTrack,
             queueIndex = c.currentMediaItemIndex,
-            queueSize = c.mediaItemCount
+            queueSize = c.mediaItemCount,
+            longForm = currentIsLongForm()
         )
     }
 
@@ -600,6 +603,14 @@ class PlayerViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun seekTo(ms: Long) { controller?.seekTo(ms) }
+
+    /** Skip within the item: back 10 s or forward 30 s on a podcast or audiobook. */
+    fun skipBy(deltaMs: Long) {
+        val c = controller ?: return
+        val dur = c.duration
+        val target = (c.currentPosition + deltaMs).coerceAtLeast(0L)
+        c.seekTo(if (dur > 0) target.coerceAtMost(dur - 1_000L).coerceAtLeast(0L) else target)
+    }
     fun next() { controller?.seekToNext() }
     fun previous() { controller?.seekToPrevious() }
 

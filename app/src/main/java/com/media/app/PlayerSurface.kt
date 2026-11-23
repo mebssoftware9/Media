@@ -34,6 +34,8 @@ import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.RepeatOne
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material.icons.filled.Replay10
+import androidx.compose.material.icons.filled.Forward30
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -1216,6 +1218,12 @@ private fun NowPlayingTransport(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Podcasts and audiobooks: back 10 s and forward 30 s either side,
+        // the controls a long listen actually needs. Music keeps its row.
+        if (state.longForm && !state.isVideo) {
+            Icon(Icons.Filled.Replay10, stringResource(R.string.video_back_10), tint = MediaColors.Cream,
+                modifier = Modifier.size(30.dp).pressScale(haptic = true) { vm.skipBy(-10_000L) })
+        }
         Icon(Icons.Filled.SkipPrevious, stringResource(R.string.action_previous), tint = MediaColors.Cream,
             modifier = Modifier.size(34.dp).pressScale(haptic = true) { vm.previous() })
         Box(
@@ -1228,6 +1236,10 @@ private fun NowPlayingTransport(
         }
         Icon(Icons.Filled.SkipNext, stringResource(R.string.action_next), tint = MediaColors.Cream,
             modifier = Modifier.size(34.dp).pressScale(haptic = true) { vm.next() })
+        if (state.longForm && !state.isVideo) {
+            Icon(Icons.Filled.Forward30, stringResource(R.string.skip_forward_30), tint = MediaColors.Cream,
+                modifier = Modifier.size(30.dp).pressScale(haptic = true) { vm.skipBy(30_000L) })
+        }
     }
 
     Row(
