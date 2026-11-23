@@ -241,7 +241,7 @@ internal fun LivingWorldLayer(
     val reading = remember(light, colors) { coverReadingOf(light, colors) }
     val kind = feed.mode.kind ?: reading?.let(::chooseWorld) ?: return
     val seed = item?.id ?: 0L
-    val budget = worldBudget(level, relieved)
+    val budget = worldBudget(level.ordinal, relieved)
     val scene = remember(kind, seed, budget) { WorldScene.create(kind, seed, budget) }
     val palette = remember(kind, colors) {
         worldPalette(

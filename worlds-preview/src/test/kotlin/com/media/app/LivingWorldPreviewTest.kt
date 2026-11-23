@@ -13,7 +13,7 @@ import javax.imageio.metadata.IIOMetadataNode
 import javax.imageio.stream.FileImageOutputStream
 
 /**
- * Renders every world to app/build/living-worlds/: a still on the kick and
+ * Renders every world to worlds-preview/build/living-worlds/: a still on the kick and
  * between kicks, a two-second loop as a GIF, and one contact sheet of all
  * seven. The Living Worlds workflow uploads the folder, so every push shows
  * what the worlds look like. The drawing is LivingWorld.kt's own; only the

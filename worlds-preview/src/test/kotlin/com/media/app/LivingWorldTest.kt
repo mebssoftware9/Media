@@ -41,11 +41,11 @@ class LivingWorldTest {
 
     @Test
     fun budgetGrowsWithTierAndShrinksWhenRelieved() {
-        val e = worldBudget(QualityLevel.ENHANCED, false)
-        val p = worldBudget(QualityLevel.PREMIUM, false)
-        val u = worldBudget(QualityLevel.ULTRA, false)
+        val e = worldBudget(0, false)
+        val p = worldBudget(1, false)
+        val u = worldBudget(2, false)
         assertTrue(e < p && p < u)
-        assertTrue(worldBudget(QualityLevel.ULTRA, true) < u)
+        assertTrue(worldBudget(2, true) < u)
     }
 
     // ------------------------------------------------------------ motion --

@@ -1,8 +1,8 @@
 # Living Worlds: what it looks like, on every push.
 #
-#   previews  The JVM tests (app/src/test): selection, bounds, pause and
+#   previews  The JVM tests (worlds-preview/): selection, bounds, pause and
 #             the visibility check, then every world drawn by its own code
-#             into PNGs and GIFs (app/build/living-worlds). Fast.
+#             into PNGs and GIFs (worlds-preview/build/living-worlds). Fast.
 #   phone     The real app on an Android emulator: the debug build, seven
 #             test songs (tools/make_world_tracks.py) opened with "Open with
 #             Via", Now Playing captured as stills and short recordings
@@ -28,20 +28,20 @@ jobs:
           java-version: "17"
       - uses: gradle/actions/setup-gradle@v4
       - name: Unit tests and previews
-        run: ./gradlew --no-daemon --stacktrace :app:testDebugUnitTest
+        run: ./gradlew --no-daemon --stacktrace :worlds-preview:test
       - name: Keep the previews
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: living-worlds-previews
-          path: app/build/living-worlds
+          path: worlds-preview/build/living-worlds
           if-no-files-found: warn
       - name: Keep the test report
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: unit-test-report
-          path: app/build/reports/tests
+          path: worlds-preview/build/reports/tests
 
   phone:
     runs-on: ubuntu-latest

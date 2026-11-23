@@ -121,7 +121,7 @@ Now Playing becomes a place. The cover decides which world it is, and the track'
 - Bounded: no full-screen flashes; every light is local and every pulse has a ceiling. Below the cover, where the title and controls are, it fades to 30%.
 - Paused, it settles into a still picture and stops asking for frames. Reduced motion draws that still picture only. Particle counts follow the tier (Enhanced about 60%, Premium 85%, Ultra all) and drop again if the frame monitor has had to lighten the tier.
 - A song's world is the same every time: positions come from its id.
-- **Seen on every push** (`.github/workflows/living-worlds.yml`): the unit tests draw each world with its own code into PNGs and GIFs, and fail if a world changes less than 1% of the screen; an Android emulator then opens seven test songs (`tools/make_world_tracks.py`) in the real app and records Now Playing (`tools/world_screenshots.sh`). Both are artifacts on the run page.
+- **Seen on every push** (`.github/workflows/living-worlds.yml`): the JVM tests (`worlds-preview/`, compiling the app's own `LivingWorld.kt`, `SoundShape.kt` and `BeatGrid.kt`) draw each world with its own code into PNGs and GIFs, and fail if a world changes less than 1% of the screen; an Android emulator then opens seven test songs (`tools/make_world_tracks.py`) in the real app and records Now Playing (`tools/world_screenshots.sh`). Both are artifacts on the run page.
 
 ### Display quality (Auto / Enhanced / Premium / Ultra)
 Every tier is free; Auto still stays within what the device can sustain.

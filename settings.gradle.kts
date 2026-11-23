@@ -14,3 +14,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Media"
 include(":app")
+include(":worlds-preview")

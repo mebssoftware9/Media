@@ -159,11 +159,13 @@ fun chooseWorld(r: CoverReading): WorldKind {
  * runs on 4 GB phones, so it draws a little over half; a tier the frame
  * monitor has had to lighten (its light field taken off) draws less again.
  */
-fun worldBudget(level: QualityLevel, relieved: Boolean): Float {
-    val base = when (level) {
-        QualityLevel.ENHANCED -> 0.60f
-        QualityLevel.PREMIUM -> 0.85f
-        QualityLevel.ULTRA -> 1.00f
+fun worldBudget(tier: Int, relieved: Boolean): Float {
+    // 0 Enhanced, 1 Premium, 2 Ultra (QualityLevel's order). A plain number
+    // keeps this file free of Android types, so the JVM previews compile it.
+    val base = when (tier) {
+        0 -> 0.60f
+        1 -> 0.85f
+        else -> 1.00f
     }
     return if (relieved) base * 0.6f else base
 }
