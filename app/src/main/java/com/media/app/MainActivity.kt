@@ -974,6 +974,16 @@ private fun HomeFeed(
         val homeStyle by remember(ctxHome) { SettingsStore.homeStyleFlow(ctxHome) }.collectAsState(initial = HomeStyle.LIVING_ROOM)
         val homeWorld by remember(ctxHome) { SettingsStore.worldFlow(ctxHome) }.collectAsState(initial = WorldMode.AUTO)
 
+        // Living Room: the world is the room behind the whole page, fading
+        // into the cover's light lower down; everything scrolls over it.
+        if (homeStyle == HomeStyle.LIVING_ROOM && nav.homePillar != Pillar.VIDEO) {
+            val roomItem = remember(byPillar, nav.homePillar, state.currentUri, lib.lastPlayed) {
+                livingRoomItem(byPillar[nav.homePillar].orEmpty(), state.currentUri, lib.lastPlayed)
+            }
+            if (roomItem != null) {
+                LivingRoomBackdrop(roomItem, homeWorld, active = !nav.anyOverlay, modifier = Modifier.fillMaxSize())
+            }
+        }
         Column(Modifier.fillMaxSize().statusBarsPadding()) {
             // FIXED top region - does not scroll. The header and the bar are
             // the same on Home, Library and Playlists.
@@ -1086,20 +1096,19 @@ private fun HomeFormatPage(
                     val playingHere = inPillar.firstOrNull { it.uri.toString() == state.currentUri }
                     when (style) {
                         HomeStyle.LIVING_ROOM -> {
-                            val stageItem = playingHere ?: resume?.first ?: recent.firstOrNull() ?: shown.firstOrNull()
+                            // The same song as the world behind the page.
+                            val stageItem = livingRoomItem(inPillar, state.currentUri, lib.lastPlayed)
                             if (stageItem != null) {
                                 LivingRoomStage(
                                     item = stageItem,
                                     eyebrow = stringResource(
                                         when {
                                             playingHere != null -> R.string.now_playing_title
-                                            resume != null -> R.string.home_where_left
+                                            resume?.first?.id == stageItem.id -> R.string.home_where_left
                                             else -> R.string.home_last_played
                                         }
                                     ),
-                                    worldMode = homeWorld,
                                     playing = playingHere != null,
-                                    active = !nav.anyOverlay,
                                     onPlay = {
                                         when {
                                             playingHere != null -> nav.showPlayer = true

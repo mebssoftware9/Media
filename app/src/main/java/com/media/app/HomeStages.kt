@@ -41,6 +41,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
@@ -138,78 +139,98 @@ private fun Eyebrow(text: String) {
 // ------------------------------------------------------------ LIVING ROOM --
 
 /**
- * Home as the Living World of [item]: the world runs calmly behind, the
- * cover floats in it, and one button continues.
+ * The Living Room's world, behind the WHOLE Home page: fixed, not scrolling,
+ * and fading out down the screen into the room's own light, so Home is one
+ * room and everything scrolls over it. Runs only while Home is on screen.
+ */
+@Composable
+fun LivingRoomBackdrop(item: AppMediaItem, worldMode: WorldMode, active: Boolean, modifier: Modifier = Modifier) {
+    if (worldMode == WorldMode.OFF) return
+    val density = LocalDensity.current
+    val q = LocalQuality.current
+    val light = rememberCoverLight(item)
+    val colors = rememberArtColors(item)
+    val feed = remember(worldMode) {
+        // Calm motion with no song analysis: the world moves on its own.
+        WorldFeed(mode = worldMode, shape = null, volume = 1f, playing = true, speed = 1f, clock = { 0L })
+    }
+    BoxWithConstraints(
+        modifier
+            .graphicsLayer { compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen }
+            .drawWithContent {
+                drawContent()
+                // Full strength at the top, gone by three quarters down.
+                drawRect(
+                    Brush.verticalGradient(0f to Color.Black, 0.45f to Color.Black, 0.78f to Color.Transparent),
+                    blendMode = BlendMode.DstIn
+                )
+            }
+    ) {
+        val wPx = with(density) { maxWidth.toPx() }
+        LivingWorldLayer(
+            feed = feed, item = item, light = light, colors = colors, tilt = null, active = active,
+            coverCx = wPx / 2f,
+            coverCy = with(density) { (StageTop + CoverDp / 2).toPx() },
+            coverSize = with(density) { CoverDp.toPx() },
+            textTop = with(density) { (StageTop + CoverDp + 24.dp).toPx() },
+            level = q.level, relieved = q.lightField == 0,
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+}
+
+/** Where the floating cover sits, from the top of the screen. */
+private val StageTop = 190.dp
+private val CoverDp = 196.dp
+
+/**
+ * The Living Room's stage, the first thing in Home's list: the cover
+ * floating in the world behind it, the title, one button. No background of
+ * its own; the world is behind the whole page.
  */
 @Composable
 fun LivingRoomStage(
     item: AppMediaItem,
     eyebrow: String,
-    worldMode: WorldMode,
     playing: Boolean,
-    /** Home is on screen: the world runs only then. */
-    active: Boolean,
     onPlay: () -> Unit
 ) {
-    val density = LocalDensity.current
-    val q = LocalQuality.current
-    val light = rememberCoverLight(item)
     val colors = rememberArtColors(item)
-    val coverDp = 196.dp
-    val coverTop = 40.dp
     // A slow float, a few dp: the cover is in the world, not pinned on it.
     val t = rememberInfiniteTransition(label = "float")
     val bob by t.animateFloat(
         -1f, 1f, infiniteRepeatable(tween(3200, easing = LinearEasing), RepeatMode.Reverse), label = "bob"
     )
-    BoxWithConstraints(Modifier.fillMaxWidth().height(470.dp)) {
-        val wPx = with(density) { maxWidth.toPx() }
-        // Calm motion with no song analysis: the world moves on its own.
-        val feed = remember(worldMode) {
-            WorldFeed(mode = worldMode, shape = null, volume = 1f, playing = true, speed = 1f, clock = { 0L })
-        }
-        if (worldMode != WorldMode.OFF) {
-            LivingWorldLayer(
-                feed = feed, item = item, light = light, colors = colors, tilt = null, active = active,
-                coverCx = wPx / 2f,
-                coverCy = with(density) { (coverTop + coverDp / 2).toPx() },
-                coverSize = with(density) { coverDp.toPx() },
-                textTop = with(density) { (coverTop + coverDp + 24.dp).toPx() },
-                level = q.level, relieved = q.lightField == 0,
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-        // The room sinks into the page below, so the list carries on from it.
-        Box(
-            Modifier.fillMaxSize().background(
-                Brush.verticalGradient(0.55f to Color.Transparent, 1f to MediaColors.Ink)
-            )
-        )
+    Column(
+        Modifier.fillMaxWidth().padding(top = 28.dp, bottom = Space.xl),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         CoverArt(
             item,
-            Modifier.align(Alignment.TopCenter).offset(y = coverTop)
-                .graphicsLayer { translationY = bob * 6.dp.toPx() }
-                .size(coverDp)
+            Modifier.graphicsLayer { translationY = bob * 6.dp.toPx() }
+                .size(CoverDp)
                 .shadow(28.dp, RoundedCornerShape(24.dp), spotColor = colors?.glow ?: Color.Black)
                 .clip(RoundedCornerShape(24.dp)),
             corner = 0, targetPx = 600
         )
-        Column(
-            Modifier.align(Alignment.TopCenter).offset(y = coverTop + coverDp + 24.dp)
-                .fillMaxWidth().padding(horizontal = Space.xl),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Eyebrow(eyebrow)
-            Spacer(Modifier.height(6.dp))
-            Text(shownTitle(item.title), style = Typo.Display.copy(fontWeight = FontWeight.ExtraBold),
-                color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
-            Text(shownArtist(item.artist), style = Typo.Body, color = Color.White.copy(alpha = 0.75f),
-                maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Spacer(Modifier.height(14.dp))
-            WhiteButton(stringResource(if (playing) R.string.home_open else R.string.home_continue), onPlay)
-        }
+        Spacer(Modifier.height(24.dp))
+        Eyebrow(eyebrow)
+        Spacer(Modifier.height(6.dp))
+        Text(shownTitle(item.title), style = Typo.Display.copy(fontWeight = FontWeight.ExtraBold),
+            color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = Space.xl))
+        Text(shownArtist(item.artist), style = Typo.Body, color = Color.White.copy(alpha = 0.75f),
+            maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Spacer(Modifier.height(14.dp))
+        WhiteButton(stringResource(if (playing) R.string.home_open else R.string.home_continue), onPlay)
     }
 }
+
+/** The song the Living Room is about: playing here, else the last played, else the first. */
+fun livingRoomItem(inPillar: List<AppMediaItem>, currentUri: String?, lastPlayed: Map<Long, Long>): AppMediaItem? =
+    inPillar.firstOrNull { it.uri.toString() == currentUri }
+        ?: inPillar.filter { lastPlayed.containsKey(it.id) }.maxByOrNull { lastPlayed[it.id] ?: 0L }
+        ?: inPillar.firstOrNull()
 
 // ---------------------------------------------------------------- JUKEBOX --
 
