@@ -88,6 +88,7 @@ fun SettingsScreen(
         SectionLabel(stringResource(R.string.settings_appearance))
         SettingsCard {
             LanguageRow()
+            HomeStyleRow()
             FontSizePicker(settings.fontScale, onFontScaleChange)
         }
 
@@ -672,6 +673,52 @@ private fun WorldRow() {
     }
 }
 
+/** How Home opens: Living Room, Jukebox Dial, Listening Aura or Classic. */
+@Composable
+private fun HomeStyleRow() {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val style by remember(context) { SettingsStore.homeStyleFlow(context) }.collectAsState(initial = HomeStyle.LIVING_ROOM)
+    var open by remember { mutableStateOf(false) }
+    SettingRow(
+        Icons.Outlined.Dashboard, stringResource(R.string.home_style), homeStyleName(style),
+        subtitle = stringResource(R.string.home_style_sub)
+    ) { open = true }
+    if (open) {
+        AlertDialog(
+            onDismissRequest = { open = false },
+            containerColor = MediaColors.Modal,
+            title = { Text(stringResource(R.string.home_style), color = MediaColors.Cream) },
+            text = {
+                Column {
+                    HomeStyle.entries.forEach { option ->
+                        LanguageChoice(
+                            homeStyleName(option),
+                            stringResource(
+                                when (option) {
+                                    HomeStyle.LIVING_ROOM -> R.string.home_style_living_sub
+                                    HomeStyle.JUKEBOX -> R.string.home_style_jukebox_sub
+                                    HomeStyle.AURA -> R.string.home_style_aura_sub
+                                    HomeStyle.CLASSIC -> R.string.home_style_classic_sub
+                                }
+                            ),
+                            selected = option == style
+                        ) {
+                            open = false
+                            scope.launch { SettingsStore.setHomeStyle(context, option) }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton({ open = false }) {
+                    Text(stringResource(R.string.action_cancel), color = MediaColors.CreamDim)
+                }
+            }
+        )
+    }
+}
+
 @Composable
 private fun worldName(mode: WorldMode): String = stringResource(
     when (mode) {
@@ -727,6 +774,7 @@ private fun tileColorFor(icon: ImageVector): Color {
     val n = icon.name
     return when {
         "Storage" in n -> Color(0xFF60A5FA)
+        "Dashboard" in n -> Color(0xFF20E6F2)
         "Refresh" in n -> Color(0xFF2DD4BF)
         "GraphicEq" in n -> Color(0xFFA78BFA)
         "Landscape" in n -> Color(0xFF4ADE80)

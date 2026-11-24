@@ -969,6 +969,10 @@ private fun HomeFeed(
             }
         }
         val streak by Retention.streak.collectAsState()
+        // How Home opens (HomeStages.kt): Living Room, Jukebox, Aura or Classic.
+        val ctxHome = LocalContext.current
+        val homeStyle by remember(ctxHome) { SettingsStore.homeStyleFlow(ctxHome) }.collectAsState(initial = HomeStyle.LIVING_ROOM)
+        val homeWorld by remember(ctxHome) { SettingsStore.worldFlow(ctxHome) }.collectAsState(initial = WorldMode.AUTO)
 
         Column(Modifier.fillMaxSize().statusBarsPadding()) {
             // FIXED top region - does not scroll. The header and the bar are
@@ -994,7 +998,8 @@ private fun HomeFeed(
                     pillar = HomeFormats[page], nav = nav, lib = lib, state = state, vm = vm,
                     db = db, scope = scope, mood = mood, setMood = setMood,
                     moodMembers = moodMembers, byPillar = byPillar, positions = positions,
-                    scanning = scanning, feedOwnsVideo = feedOwnsVideo, streak = streak
+                    scanning = scanning, feedOwnsVideo = feedOwnsVideo, streak = streak,
+                    homeStyle = homeStyle, homeWorld = homeWorld
                 )
             }
         }
@@ -1018,7 +1023,9 @@ private fun HomeFormatPage(
     positions: Map<Long, PlaybackPosition>,
     scanning: Boolean,
     feedOwnsVideo: Boolean,
-    streak: Streak
+    streak: Streak,
+    homeStyle: HomeStyle,
+    homeWorld: WorldMode
 ) {
     // Bottom inset = real nav-bar inset + chrome offset (bottom bar + mini-
     // player), so the last row always clears the chrome on any device
@@ -1073,7 +1080,78 @@ private fun HomeFormatPage(
                 modifier = Modifier.fillMaxSize()
             ) {
                 item {
-                    resume?.let { (track, pos) ->
+                    // The stage: how Home opens, in the style picked in
+                    // Settings. Video keeps its feed as it was.
+                    val style = if (pillar == Pillar.VIDEO) HomeStyle.CLASSIC else homeStyle
+                    val playingHere = inPillar.firstOrNull { it.uri.toString() == state.currentUri }
+                    when (style) {
+                        HomeStyle.LIVING_ROOM -> {
+                            val stageItem = playingHere ?: resume?.first ?: recent.firstOrNull() ?: shown.firstOrNull()
+                            if (stageItem != null) {
+                                LivingRoomStage(
+                                    item = stageItem,
+                                    eyebrow = stringResource(
+                                        when {
+                                            playingHere != null -> R.string.now_playing_title
+                                            resume != null -> R.string.home_where_left
+                                            else -> R.string.home_last_played
+                                        }
+                                    ),
+                                    worldMode = homeWorld,
+                                    playing = playingHere != null,
+                                    active = !nav.anyOverlay,
+                                    onPlay = {
+                                        when {
+                                            playingHere != null -> nav.showPlayer = true
+                                            resume != null && resume.first.id == stageItem.id ->
+                                                vm.playAt(stageItem, resume.second.positionMs)
+                                            else -> {
+                                                val i = shown.indexOfFirst { it.id == stageItem.id }
+                                                if (i >= 0) vm.play(shown, i) else vm.play(listOf(stageItem), 0)
+                                            }
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                        HomeStyle.JUKEBOX -> {
+                            // The wheel starts on what was played last, then the rest.
+                            val wheel = remember(recent, shown) { (recent + shown).distinctBy { it.id }.take(40) }
+                            JukeboxStage(
+                                items = wheel,
+                                onPlay = { i -> vm.play(wheel, i) },
+                                onShuffle = {
+                                    if (shown.isNotEmpty()) {
+                                        if (!state.shuffle) vm.toggleShuffle()
+                                        vm.play(shown, shown.indices.random())
+                                    }
+                                }
+                            )
+                        }
+                        HomeStyle.AURA -> {
+                            val top = remember(inPillar, lib.playCounts) {
+                                inPillar.sortedByDescending { lib.playCounts[it.id] ?: 0 }
+                            }
+                            val topArtist = remember(top, lib.playCounts) {
+                                top.filter { (lib.playCounts[it.id] ?: 0) > 0 }
+                                    .groupBy { it.artist }.maxByOrNull { (_, l) -> l.sumOf { lib.playCounts[it.id] ?: 0 } }?.key
+                            }
+                            AuraStage(
+                                played = (recent + top).distinctBy { it.id }.take(5),
+                                streak = streak,
+                                topArtist = topArtist,
+                                songs = inPillar.size,
+                                onPlayMix = {
+                                    // What you've been living in: the most played and
+                                    // the most recent, shuffled together.
+                                    val mix = (top.take(30) + recent).distinctBy { it.id }.shuffled()
+                                    if (mix.isNotEmpty()) vm.play(mix, 0)
+                                }
+                            )
+                        }
+                        HomeStyle.CLASSIC -> Unit
+                    }
+                    if (style != HomeStyle.LIVING_ROOM) resume?.let { (track, pos) ->
                         ResumeBar(
                             item = track,
                             progress = (pos.positionMs.toFloat() / pos.durationMs).coerceIn(0f, 1f),

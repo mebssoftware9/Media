@@ -31,6 +31,7 @@ object SettingsStore {
     private val REACTIVE_ART = booleanPreferencesKey("reactive_artwork")
     private val HIDE_COVER = booleanPreferencesKey("hide_cover")
     private val SPEAKER = booleanPreferencesKey("speaker_art")
+    private val HOME_STYLE = androidx.datastore.preferences.core.stringPreferencesKey("home_style")
     private val QUALITY = stringPreferencesKey("display_quality")
     private val WORLD = stringPreferencesKey("living_world")
     private val AVATAR = longPreferencesKey("avatar_stamp")
@@ -111,6 +112,14 @@ object SettingsStore {
     // aside and the Living World has the whole screen. Off by default.
     fun hideCoverFlow(context: Context): Flow<Boolean> =
         context.dataStore.data.map { it[HIDE_COVER] ?: false }
+
+    // How Home opens (HomeStages.kt). Living Room unless picked otherwise.
+    fun homeStyleFlow(context: Context): Flow<HomeStyle> =
+        context.dataStore.data.map { HomeStyle.fromName(it[HOME_STYLE]) }
+
+    suspend fun setHomeStyle(context: Context, style: HomeStyle) {
+        context.dataStore.edit { it[HOME_STYLE] = style.name }
+    }
 
     // The artwork button's speaker state (SpeakerArt.kt).
     fun speakerFlow(context: Context): Flow<Boolean> =
