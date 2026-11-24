@@ -1,4 +1,6 @@
 package com.media.app
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 
 import androidx.compose.foundation.background
@@ -84,15 +86,19 @@ fun SettingsScreen(
         ProfileMark(audioCount, videoCount)
 
         SectionLabel(stringResource(R.string.settings_appearance))
-        LanguageRow()
-        FontSizePicker(settings.fontScale, onFontScaleChange)
+        SettingsCard {
+            LanguageRow()
+            FontSizePicker(settings.fontScale, onFontScaleChange)
+        }
 
         // Library first: Storage and Rescan are what people come to Settings
         // for. They were below Sound and Artwork, a long scroll down.
         SectionLabel(stringResource(R.string.settings_library))
-        SettingRow(Icons.Outlined.Storage, stringResource(R.string.settings_storage),
-            stringResource(R.string.settings_storage_value, audioCount, videoCount), navigates = false) {}
-        RescanRow(onRescan)
+        SettingsCard {
+            SettingRow(Icons.Outlined.Storage, stringResource(R.string.settings_storage),
+                stringResource(R.string.settings_storage_value, audioCount, videoCount), navigates = false) {}
+            RescanRow(onRescan)
+        }
 
         DisplayQualitySection(
             current = settings.qualityMode,
@@ -105,6 +111,7 @@ fun SettingsScreen(
         // OFF by default. It is the most opinionated thing the app does, and
         // an effect someone dislikes is worse than one they never found.
         val reactiveArt by SettingsStore.reactiveArtFlow(context).collectAsState(initial = false)
+        SettingsCard {
         ToggleRow(
             icon = Icons.Outlined.GraphicEq,
             title = stringResource(R.string.settings_reactive),
@@ -113,17 +120,39 @@ fun SettingsScreen(
             onChange = { on -> settingsScope.launch { SettingsStore.setReactiveArt(context, on) } }
         )
         WorldRow()
+        }
 
         SectionLabel(stringResource(R.string.settings_sound))
         val sound by SoundEngine.settings.collectAsState()
-        SettingRow(
-            Icons.Outlined.Tune, stringResource(R.string.settings_sound),
-            if (sound.eqEnabled) presetLabel(sound.preset) else null,
-            subtitle = stringResource(R.string.settings_sound_sub)
-        ) { onOpenSound() }
+        SettingsCard {
+            SettingRow(
+                Icons.Outlined.Tune, stringResource(R.string.settings_sound),
+                if (sound.eqEnabled) presetLabel(sound.preset) else null,
+                subtitle = stringResource(R.string.settings_sound_sub)
+            ) { onOpenSound() }
+        }
 
         SectionLabel(stringResource(R.string.settings_art_lyrics))
         val online by remember(context) { SettingsStore.onlineFlow(context) }.collectAsState(initial = false)
+        val repair by ArtworkRepair.progress.collectAsState()
+        val artVersion by ArtworkStore.version.collectAsState()
+        val fixedCount = remember(artVersion) { ArtworkStore.fixedCount() }
+        // Android hides other apps' .lrc files from a plain scan, so a lyrics
+        // collection on the phone is only reachable through a folder the
+        // listener grants once.
+        var lyricsFolder by remember { mutableStateOf(LyricsFolder.label(context)) }
+        var lyricsCount by remember { mutableStateOf<Int?>(null) }
+        LaunchedEffect(lyricsFolder) {
+            lyricsCount = if (lyricsFolder == null) null
+                else withContext(Dispatchers.IO) { LyricsFolder.count(context) }
+        }
+        val folderPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { tree ->
+            if (tree != null) {
+                LyricsFolder.set(context, tree)
+                lyricsFolder = LyricsFolder.label(context)
+            }
+        }
+        SettingsCard {
         ToggleRow(
             icon = Icons.Outlined.Language,
             title = stringResource(R.string.settings_online),
@@ -131,9 +160,6 @@ fun SettingsScreen(
             checked = online,
             onChange = { on -> settingsScope.launch { SettingsStore.setOnline(context, on) } }
         )
-        val repair by ArtworkRepair.progress.collectAsState()
-        val artVersion by ArtworkStore.version.collectAsState()
-        val fixedCount = remember(artVersion) { ArtworkStore.fixedCount() }
         SettingRow(
             Icons.Outlined.AutoFixHigh,
             stringResource(if (repair.running) R.string.repair_stop else R.string.repair_start),
@@ -154,21 +180,6 @@ fun SettingsScreen(
             navigates = online || repair.running
         ) { if (repair.running) ArtworkRepair.cancel() else onRepairArtwork() }
 
-        // Android hides other apps' .lrc files from a plain scan, so a lyrics
-        // collection on the phone is only reachable through a folder the
-        // listener grants once.
-        var lyricsFolder by remember { mutableStateOf(LyricsFolder.label(context)) }
-        var lyricsCount by remember { mutableStateOf<Int?>(null) }
-        LaunchedEffect(lyricsFolder) {
-            lyricsCount = if (lyricsFolder == null) null
-                else withContext(Dispatchers.IO) { LyricsFolder.count(context) }
-        }
-        val folderPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { tree ->
-            if (tree != null) {
-                LyricsFolder.set(context, tree)
-                lyricsFolder = LyricsFolder.label(context)
-            }
-        }
         SettingRow(
             Icons.Outlined.Lyrics,
             stringResource(R.string.lyrics_folder),
@@ -182,13 +193,17 @@ fun SettingsScreen(
                 lyricsFolder = null
             }
         }
+        }
 
         SectionLabel(stringResource(R.string.settings_privacy))
-        SettingRow(Icons.Outlined.Shield, stringResource(R.string.settings_privacy_policy), null) {
-            runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(privacyUrl))) }
+        SettingsCard {
+            SettingRow(Icons.Outlined.Shield, stringResource(R.string.settings_privacy_policy), null) {
+                runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(privacyUrl))) }
+            }
         }
 
         SectionLabel(stringResource(R.string.settings_about))
+        SettingsCard {
         SettingRow(Icons.Outlined.Info, stringResource(R.string.settings_about_app), null) { onOpenAbout() }
         SettingRow(
             Icons.Outlined.StarOutline, stringResource(R.string.settings_rate_app), null,
@@ -196,6 +211,7 @@ fun SettingsScreen(
         ) { InAppReview.openListing(context) }
         SettingRow(Icons.Outlined.Description, stringResource(R.string.terms_title), null) { onOpenTerms() }
         SettingRow(Icons.Outlined.Info, stringResource(R.string.settings_version), BuildConfig.VERSION_NAME, navigates = false) {}
+        }
 
         Spacer(Modifier.height(40.dp))
         Text(stringResource(R.string.app_name), style = MaterialTheme.typography.displaySmall,
@@ -246,6 +262,7 @@ private fun DisplayQualitySection(current: QualityMode, onPick: (QualityMode) ->
         active.ordinal > ceiling.ordinal && !adaptive.strained
 
     SectionLabel(stringResource(R.string.dq_title))
+    SettingsCard {
 
     QualityOption(
         title = stringResource(R.string.dq_auto),
@@ -365,6 +382,7 @@ private fun DisplayQualitySection(current: QualityMode, onPick: (QualityMode) ->
         color = MediaColors.CreamFaint,
         modifier = Modifier.padding(Space.xl, Space.sm, Space.xl, Space.sm)
     )
+    }
 }
 
 @Composable
@@ -433,10 +451,10 @@ private fun RescanRow(onRescan: () -> Unit) {
                     statusValue = null
                 }
             }
-            .padding(Space.xl, Space.md),
+            .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(Icons.Outlined.Refresh, null, tint = MediaColors.CreamDim, modifier = Modifier.size(20.dp))
+        IconTile(Icons.Outlined.Refresh)
         Spacer(Modifier.width(Space.md))
         Text(stringResource(R.string.rescan_title), style = MaterialTheme.typography.bodyLarge, color = MediaColors.Cream,
             modifier = Modifier.weight(1f))
@@ -465,10 +483,10 @@ private fun ToggleRow(
     Row(
         Modifier.fillMaxWidth()
             .clickable { onChange(!checked) }
-            .padding(Space.xl, Space.md),
+            .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, null, tint = MediaColors.CreamDim, modifier = Modifier.size(20.dp))
+        IconTile(icon)
         Spacer(Modifier.width(Space.md))
         Column(Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.bodyLarge, color = MediaColors.Cream)
@@ -491,9 +509,9 @@ private fun ToggleRow(
 
 @Composable
 private fun FontSizePicker(current: Float, onChange: (Float) -> Unit) {
-    Column(Modifier.fillMaxWidth().padding(Space.xl, Space.md)) {
+    Column(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Outlined.TextFields, null, tint = MediaColors.CreamDim, modifier = Modifier.size(20.dp))
+            IconTile(Icons.Outlined.TextFields)
             Spacer(Modifier.width(Space.md))
             Text(stringResource(R.string.text_size), style = MaterialTheme.typography.bodyLarge, color = MediaColors.Cream)
         }
@@ -684,6 +702,57 @@ private fun SectionLabel(text: String) {
     )
 }
 
+// The approved design: every section is one rounded glass card, and every
+// row's icon sits in a small coloured tile, the way Samsung groups its own
+// settings. The tile's colour comes from the icon, so each kind of setting
+// keeps one colour wherever it appears.
+@Composable
+private fun SettingsCard(content: @Composable ColumnScope.() -> Unit) {
+    val shape = RoundedCornerShape(24.dp)
+    Column(
+        Modifier.fillMaxWidth().padding(horizontal = 12.dp)
+            .clip(shape)
+            .background(
+                Brush.verticalGradient(
+                    listOf(Color.White.copy(alpha = 0.085f), Color.White.copy(alpha = 0.045f))
+                )
+            )
+            .border(1.dp, Color.White.copy(alpha = 0.08f), shape)
+            .padding(vertical = 4.dp),
+        content = content
+    )
+}
+
+private fun tileColorFor(icon: ImageVector): Color {
+    val n = icon.name
+    return when {
+        "Storage" in n -> Color(0xFF60A5FA)
+        "Refresh" in n -> Color(0xFF2DD4BF)
+        "GraphicEq" in n -> Color(0xFFA78BFA)
+        "Landscape" in n -> Color(0xFF4ADE80)
+        "Tune" in n -> Color(0xFFFBBF24)
+        "Language" in n || "Translate" in n -> Color(0xFF38BDF8)
+        "AutoFixHigh" in n -> Color(0xFFF472B6)
+        "Lyrics" in n -> Color(0xFFC084FC)
+        "LinkOff" in n -> Color(0xFFF87171)
+        "Shield" in n -> Color(0xFF34D399)
+        "Star" in n -> Color(0xFFFBBF24)
+        "TextFields" in n -> Color(0xFF2DD4BF)
+        else -> Color(0xFF9CA3AF)
+    }
+}
+
+@Composable
+private fun IconTile(icon: ImageVector) {
+    val c = tileColorFor(icon)
+    Box(
+        Modifier.size(38.dp).clip(RoundedCornerShape(12.dp)).background(c.copy(alpha = 0.16f)),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(icon, null, tint = c, modifier = Modifier.size(20.dp))
+    }
+}
+
 @Composable
 private fun SettingRow(
     icon: ImageVector,
@@ -696,10 +765,10 @@ private fun SettingRow(
 ) {
     Row(
         Modifier.fillMaxWidth().clickable(enabled = navigates, onClick = onClick)
-            .padding(Space.xl, Space.md),
+            .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, null, tint = MediaColors.CreamDim, modifier = Modifier.size(20.dp))
+        IconTile(icon)
         Spacer(Modifier.width(Space.md))
         Column(Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.bodyLarge, color = MediaColors.Cream)
