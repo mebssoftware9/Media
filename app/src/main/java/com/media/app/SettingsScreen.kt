@@ -203,7 +203,7 @@ fun SettingsScreen(
             modifier = Modifier.padding(Space.xl))
         Text(stringResource(R.string.tagline),
             style = MaterialTheme.typography.bodyMedium, color = MediaColors.CreamFaint,
-            modifier = Modifier.padding(start = Space.xl).padding(bottom = bottomSafePadding(gap = 100.dp)))
+            modifier = Modifier.padding(start = Space.xl).padding(bottom = bottomSafePadding(gap = 170.dp)))
     }
 }
 
