@@ -105,7 +105,7 @@ fun SungLine(
         rise.snapTo(1f)
         rise.animateTo(0f, spring(dampingRatio = 0.72f, stiffness = Spring.StiffnessMediumLow))
     }
-    val cream = MediaColors.Cream
+    val cream = Color.White
     val base = Typo.Section
     // Centred: the line rises in from below and opens out from the middle
     // to its full width, and the next line waits, centred, beneath it.
@@ -121,7 +121,9 @@ fun SungLine(
             style = base.copy(
                 fontWeight = FontWeight.Bold,
                 brush = sweepBrush(p, accent, cream),
-                shadow = Shadow(accent.copy(alpha = 0.55f + 0.35f * rise.value), blurRadius = 22f + 30f * rise.value)
+                // A dark shadow under it holds it on bright covers; the
+                // flash of light comes with each new line.
+                shadow = Shadow(Color.Black.copy(alpha = 0.55f), offset = androidx.compose.ui.geometry.Offset(0f, 2f), blurRadius = 18f + 20f * rise.value)
             ),
             maxLines = 2, overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,

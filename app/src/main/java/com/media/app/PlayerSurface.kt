@@ -1067,66 +1067,74 @@ private fun NowPlayingTopBar(
     onOpenSound: () -> Unit,
     onOpenQueue: () -> Unit
 ) {
+    // The approved design: collapse on its own in a glass circle on the left,
+    // the screen's tools together in one glass capsule on the right.
     Row(
         Modifier.fillMaxWidth().statusBarsPadding()
-            .padding(Space.sm, Space.sm).alpha(fullAlpha),
+            .padding(horizontal = Space.lg, vertical = Space.sm).alpha(fullAlpha),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            Icons.Filled.KeyboardArrowDown, stringResource(R.string.action_collapse), tint = MediaColors.Cream,
-            modifier = Modifier.size(28.dp).pressScale { onCollapse() }
-        )
+        Box(
+            Modifier.size(42.dp).glassSurface(CircleShape)
+                .pressScale { onCollapse() },
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(Icons.Filled.KeyboardArrowDown, stringResource(R.string.action_collapse), tint = MediaColors.Cream,
+                modifier = Modifier.size(26.dp))
+        }
         Spacer(Modifier.weight(1f))
-        Text(stringResource(R.string.now_playing_title), style = Typo.Tertiary, color = MediaColors.CreamDim)
-        Spacer(Modifier.weight(1f))
-        // PiP only exists for video, and only where the device
-        // supports it - no dead button on an audio track.
         val ctx = androidx.compose.ui.platform.LocalContext.current
-        if (state.isVideo) {
-            Icon(
-                Icons.Filled.Fullscreen, stringResource(R.string.action_fullscreen), tint = MediaColors.Cream,
-                modifier = Modifier.size(26.dp)
-                    .pressScale(haptic = true, onClick = onFullscreen)
-            )
-            Spacer(Modifier.width(Space.md))
-        }
-        if (state.isVideo && Pip.isSupported(ctx)) {
-            Icon(
-                Icons.Filled.PictureInPictureAlt, stringResource(R.string.action_pip),
-                tint = MediaColors.Cream,
-                modifier = Modifier.size(26.dp).pressScale(haptic = true) {
-                    (ctx as? android.app.Activity)?.let {
-                        Pip.enter(it, state.videoWidth, state.videoHeight)
-                    }
+        Row(
+            Modifier.glassSurface(RoundedCornerShape(18.dp)).padding(4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // PiP only exists for video, and only where the device
+            // supports it - no dead button on an audio track.
+            if (state.isVideo) {
+                CapsuleButton(Icons.Filled.Fullscreen, stringResource(R.string.action_fullscreen), lit = false, onClick = onFullscreen)
+            }
+            if (state.isVideo && Pip.isSupported(ctx)) {
+                CapsuleButton(Icons.Filled.PictureInPictureAlt, stringResource(R.string.action_pip), lit = false) {
+                    (ctx as? android.app.Activity)?.let { Pip.enter(it, state.videoWidth, state.videoHeight) }
                 }
-            )
-            Spacer(Modifier.width(Space.md))
+            }
+            if (!state.isVideo) {
+                CapsuleButton(
+                    Icons.Filled.Lyrics,
+                    stringResource(if (showLyrics) R.string.action_hide_lyrics else R.string.action_lyrics),
+                    lit = showLyrics, onClick = onToggleLyrics
+                )
+                // The Sound screen, one tap from what is playing. Lit while
+                // the EQ is on, like shuffle and repeat.
+                val eqOn = SoundEngine.settings.collectAsState().value.eqEnabled
+                CapsuleButton(Icons.Filled.Equalizer, stringResource(R.string.action_equalizer), lit = eqOn, onClick = onOpenSound)
+            }
+            CapsuleButton(Icons.AutoMirrored.Filled.QueueMusic, stringResource(R.string.action_queue), lit = false, onClick = onOpenQueue)
         }
-        // Video has no favourites concept here and the row is
-        // already carrying fullscreen + PiP.
-        if (!state.isVideo) {
-            Icon(
-                Icons.Filled.Lyrics, stringResource(if (showLyrics) R.string.action_hide_lyrics else R.string.action_lyrics),
-                tint = if (showLyrics) MediaColors.Accent else MediaColors.Cream,
-                modifier = Modifier.size(24.dp).pressScale(haptic = true) { onToggleLyrics() }
-            )
-            Spacer(Modifier.width(Space.md))
-            // The Sound screen, one tap from what is playing.
-            // Accent while the EQ is on, like shuffle and repeat.
-            val eqOn = SoundEngine.settings.collectAsState().value.eqEnabled
-            Icon(
-                Icons.Filled.Equalizer, stringResource(R.string.action_equalizer),
-                tint = if (eqOn) MediaColors.Accent else MediaColors.Cream,
-                modifier = Modifier.size(24.dp).pressScale(haptic = true, onClick = onOpenSound)
-            )
-            Spacer(Modifier.width(Space.md))
-        }
-        Icon(
-            Icons.AutoMirrored.Filled.QueueMusic, stringResource(R.string.action_queue), tint = MediaColors.Cream,
-            modifier = Modifier.size(28.dp).pressScale(haptic = true) { onOpenQueue() }
-        )
     }
 }
+
+/** One of the top capsule's buttons: a 40dp target, lit in cyan while on. */
+@Composable
+private fun CapsuleButton(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, lit: Boolean, onClick: () -> Unit) {
+    Box(
+        Modifier.size(40.dp).clip(RoundedCornerShape(14.dp))
+            .background(if (lit) NpLit.copy(alpha = 0.16f) else Color.Transparent)
+            .pressScale(haptic = true, onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(icon, label, tint = if (lit) NpLit else MediaColors.Cream, modifier = Modifier.size(22.dp))
+    }
+}
+
+/** The luminous cyan of the approved design: what is on, in Now Playing. */
+internal val NpLit = Color(0xFF20E6F2)
+
+/** Now Playing's glass: a faint fill, lit at the top, with a hairline edge. */
+internal fun Modifier.glassSurface(shape: androidx.compose.ui.graphics.Shape): Modifier =
+    this.clip(shape)
+        .background(Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.12f), Color.White.copy(alpha = 0.06f))))
+        .border(1.dp, Color.White.copy(alpha = 0.10f), shape)
 
 /** Everything under the artwork: the sung line, title, scrubber, transport. */
 @Composable
@@ -1174,7 +1182,9 @@ private fun BoxScope.NowPlayingControls(
                 statePositionMs = state.positionMs,
                 playing = state.isPlaying,
                 offsetMs = previewOffset,
-                accent = npAccent,
+                // White, swept in cyan: readable on any cover (the cover's
+                // own accent could wash out against its own backdrop).
+                accent = NpLit,
                 beat = beat,
                 modifier = Modifier.fillMaxWidth()
                     .padding(start = Space.xl, end = Space.xl, bottom = Space.md),
@@ -1271,9 +1281,13 @@ private fun NowPlayingTitle(
                 Spacer(Modifier.width(Space.md))
                 // The artwork button, beside the heart: still cover ->
                 // reactive -> speaker -> hidden. Lit while not still.
-                ArtworkButton(artMode, onCycleArt, Modifier.size(28.dp))
-                Spacer(Modifier.width(Space.lg))
-                FavoriteButton(isFavorite, Modifier.size(28.dp), onToggleFavorite)
+                Box(Modifier.size(44.dp).glassSurface(RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) {
+                    ArtworkButton(artMode, onCycleArt, Modifier.size(24.dp))
+                }
+                Spacer(Modifier.width(Space.sm))
+                Box(Modifier.size(44.dp).glassSurface(RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) {
+                    FavoriteButton(isFavorite, Modifier.size(24.dp), onToggleFavorite)
+                }
             }
         }
         // What the file really is, quietly. Tap for the whole
@@ -1336,40 +1350,55 @@ private fun NowPlayingTransport(
     }
 
     Row(
-        Modifier.fillMaxWidth().padding(Space.xl, 0.dp, Space.xl, Space.xl),
+        // The approved design: the small controls together in one glass
+        // dock, each a 48dp target; whichever is on is lit.
+        Modifier.fillMaxWidth().padding(Space.lg, 0.dp, Space.lg, Space.lg)
+            .height(58.dp).glassSurface(RoundedCornerShape(22.dp)).padding(horizontal = 6.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(Icons.Filled.Shuffle, stringResource(R.string.action_shuffle),
-            tint = if (state.shuffle) MediaColors.Accent else MediaColors.CreamDim,
-            modifier = Modifier.size(IconSize.lg).pressScale(haptic = true) { vm.toggleShuffle() })
-        Icon(
-            if (state.repeatMode == 1) Icons.Filled.RepeatOne else Icons.Filled.Repeat,
-            stringResource(R.string.action_repeat),
-            tint = if (state.repeatMode != 0) MediaColors.Accent else MediaColors.CreamDim,
-            modifier = Modifier.size(IconSize.lg).pressScale(haptic = true) { vm.cycleRepeat() }
-        )
-        LoopButton(vm)
-        if (state.longForm && !state.isVideo) {
-            Icon(Icons.Outlined.Bookmarks, stringResource(R.string.marks_title),
-                tint = MediaColors.CreamDim,
-                modifier = Modifier.size(IconSize.lg).pressScale(haptic = true, onClick = onOpenMarks))
+        DockCell(state.shuffle, { vm.toggleShuffle() }) {
+            Icon(Icons.Filled.Shuffle, stringResource(R.string.action_shuffle),
+                tint = if (state.shuffle) NpLit else MediaColors.CreamDim, modifier = Modifier.size(IconSize.lg))
         }
-        Text(
-            speedLabel(state.speed), style = Typo.Primary,
-            color = if (state.speed != 1.0f) MediaColors.Accent else MediaColors.CreamDim,
-            modifier = Modifier.pressScale(haptic = true, onClick = onOpenSpeed)
-        )
-        if (state.sleepActive && !state.sleepEndOfTrack) {
-            Text(fmtClock(state.sleepRemainingMs), style = Typo.Primary,
-                color = MediaColors.Accent,
-                modifier = Modifier.pressScale { onOpenSleep() })
-        } else {
-            Icon(Icons.Filled.Bedtime, stringResource(R.string.action_sleep_timer),
-                tint = if (state.sleepActive) MediaColors.Accent else MediaColors.CreamDim,
-                modifier = Modifier.size(IconSize.lg).pressScale { onOpenSleep() })
+        DockCell(state.repeatMode != 0, { vm.cycleRepeat() }) {
+            Icon(
+                if (state.repeatMode == 1) Icons.Filled.RepeatOne else Icons.Filled.Repeat,
+                stringResource(R.string.action_repeat),
+                tint = if (state.repeatMode != 0) NpLit else MediaColors.CreamDim, modifier = Modifier.size(IconSize.lg)
+            )
+        }
+        Box(Modifier.size(width = 56.dp, height = 46.dp), contentAlignment = Alignment.Center) { LoopButton(vm) }
+        if (state.longForm && !state.isVideo) {
+            DockCell(false, onOpenMarks) {
+                Icon(Icons.Outlined.Bookmarks, stringResource(R.string.marks_title),
+                    tint = MediaColors.CreamDim, modifier = Modifier.size(IconSize.lg))
+            }
+        }
+        DockCell(state.speed != 1.0f, onOpenSpeed) {
+            Text(speedLabel(state.speed), style = Typo.Primary,
+                color = if (state.speed != 1.0f) NpLit else MediaColors.CreamDim)
+        }
+        DockCell(state.sleepActive, onOpenSleep) {
+            if (state.sleepActive && !state.sleepEndOfTrack) {
+                Text(fmtClock(state.sleepRemainingMs), style = Typo.Tertiary, color = NpLit)
+            } else {
+                Icon(Icons.Filled.Bedtime, stringResource(R.string.action_sleep_timer),
+                    tint = if (state.sleepActive) NpLit else MediaColors.CreamDim, modifier = Modifier.size(IconSize.lg))
+            }
         }
     }
+}
+
+/** One place in the dock: a 48dp target, a soft cyan tile behind it while on. */
+@Composable
+private fun DockCell(on: Boolean, onClick: () -> Unit, content: @Composable () -> Unit) {
+    Box(
+        Modifier.size(width = 52.dp, height = 46.dp).clip(RoundedCornerShape(15.dp))
+            .background(if (on) NpLit.copy(alpha = 0.14f) else Color.Transparent)
+            .pressScale(haptic = true, onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) { content() }
 }
 
 /** Lightweight item so CoverArt can drive off the session's current URI. */
