@@ -96,9 +96,13 @@ fun SungLine(
 ) {
     val pos by rememberSmoothPosition(statePositionMs, playing)
     val i = Lrc.activeIndex(lines, pos, offsetMs)
-    val now = lines.getOrNull(i)?.text?.takeIf { it.isNotBlank() } ?: "♪"
-    val next = lines.getOrNull(i + 1)?.text.orEmpty()
-    val p = if (i >= 0) lineProgress(lines, i, pos, offsetMs) else 0f
+    // In a gap (before the first line, or an instrumental break) the next
+    // sung line waits in its place, faint, rather than a lone note.
+    val gap = i < 0 || lines[i].text.isBlank()
+    val upcoming = lines.drop((i + 1).coerceAtLeast(0)).firstOrNull { it.text.isNotBlank() }?.text
+    val now = if (gap) upcoming ?: "♪" else lines[i].text
+    val next = if (gap) "" else lines.getOrNull(i + 1)?.text.orEmpty()
+    val p = if (gap) 0f else lineProgress(lines, i, pos, offsetMs)
     // Each new line rises in from below with a flash of light.
     val rise = remember { Animatable(0f) }
     LaunchedEffect(i) {
@@ -120,7 +124,7 @@ fun SungLine(
             now,
             style = base.copy(
                 fontWeight = FontWeight.Bold,
-                brush = sweepBrush(p, accent, cream),
+                brush = if (gap) androidx.compose.ui.graphics.SolidColor(cream.copy(alpha = 0.45f)) else sweepBrush(p, accent, cream),
                 // A dark shadow under it holds it on bright covers; the
                 // flash of light comes with each new line.
                 shadow = Shadow(Color.Black.copy(alpha = 0.55f), offset = androidx.compose.ui.geometry.Offset(0f, 2f), blurRadius = 18f + 20f * rise.value)

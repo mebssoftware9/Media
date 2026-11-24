@@ -390,7 +390,8 @@ fun PlayerSurface(
                         item = artItem, beat = beat,
                         running = state.isPlaying && expanded && !reduced,
                         strength = (0.45f + 0.15f * q.reactiveLevel).coerceIn(0.5f, 1f),
-                        side = sideDp
+                        side = sideDp,
+                        rim = glow
                     )
                 }
             }

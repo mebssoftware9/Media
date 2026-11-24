@@ -93,6 +93,8 @@ fun SpeakerDriver(
     running: Boolean,
     strength: Float,
     side: Dp,
+    /** The room's light (the cover's glow): the cabinet's edges catch it. */
+    rim: Color = Color(0xFF9AA3AD),
     modifier: Modifier = Modifier
 ) {
     val excursion = rememberExcursion(beat, running)
@@ -113,7 +115,7 @@ fun SpeakerDriver(
         ) {
             // Cabinet, baffle, tweeter, port and badge.
             Canvas(Modifier.fillMaxSize()) {
-                drawCabinet()
+                drawCabinet(rim)
                 drawTweeter(tweeterKick(beat) * strength)
                 drawPort()
             }
@@ -167,13 +169,27 @@ private fun DrawScope.drawFloorShadow(cabW: Float) {
 }
 
 /** The box: matte graphite, a lit bevel, a recessed baffle and a satin sheen. */
-private fun DrawScope.drawCabinet() {
+private fun DrawScope.drawCabinet(rim: Color) {
     val w = size.width
     val h = size.height
     val rad = androidx.compose.ui.geometry.CornerRadius(w * 0.07f)
+    // Graphite, a step lighter than the room so the box reads as an object.
     drawRoundRect(
-        Brush.verticalGradient(listOf(Color(0xFF24252A), Color(0xFF141519), Color(0xFF0C0C0E))),
+        Brush.verticalGradient(listOf(Color(0xFF34363D), Color(0xFF202126), Color(0xFF141418))),
         cornerRadius = rad
+    )
+    // The room's light on the cabinet: a wash down its left side, and its
+    // top and left edges lit in that colour, so it stands IN the room.
+    drawRoundRect(
+        Brush.horizontalGradient(0f to rim.copy(alpha = 0.16f), 0.4f to rim.copy(alpha = 0.04f), 0.7f to Color.Transparent),
+        cornerRadius = rad
+    )
+    drawRoundRect(
+        Brush.linearGradient(
+            listOf(rim.copy(alpha = 0.75f), rim.copy(alpha = 0.25f), Color.Transparent),
+            start = Offset(0f, 0f), end = Offset(w * 0.9f, h * 0.6f)
+        ),
+        cornerRadius = rad, style = Stroke(w * 0.010f)
     )
     // Satin sheen down the left of the front, as off a studio light.
     drawRoundRect(
